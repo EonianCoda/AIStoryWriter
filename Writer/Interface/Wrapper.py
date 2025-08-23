@@ -164,9 +164,14 @@ class Interface:
         while True:
             Response = self.SafeGenerateText(_Logger, _Messages, _Model, _SeedOverride, _Format = "JSON")
             try:
+                last_message = self.GetLastMessageText(Response)
+                
+                # format last message
+                last_message = re.sub(r'^```json\s*', '', last_message)
+                last_message = re.sub(r'\s*```$', '', last_message)
 
-                # Check that it returned valid json
-                JSONResponse = json.loads(self.GetLastMessageText(Response))
+                # return valid json
+                JSONResponse = json.loads(last_message)
 
                 # Now ensure it has the right attributes
                 for _Attrib in _RequiredAttribs:
