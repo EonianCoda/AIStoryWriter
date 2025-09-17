@@ -245,7 +245,7 @@ Interface = Writer.Interface.Wrapper.Interface(Models)
 Prompt: str = ""
 if Args.Prompt is None:
     raise Exception("No Prompt Provided")
-with open(Args.Prompt, "r") as f:
+with open(Args.Prompt, "r", encoding="utf-8") as f:
     Prompt = f.read()
 
 

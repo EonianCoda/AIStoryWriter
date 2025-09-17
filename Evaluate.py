@@ -179,9 +179,9 @@ Interface = Writer.Interface.Wrapper.Interface([Args.Model])
 # Load the initial story
 Story1:dict = {}
 Story2:dict = {}
-with open(Args.Story1, "r") as f:
+with open(Args.Story1, "r", encoding="utf-8") as f:
     Story1 = json.loads(f.read())
-with open(Args.Story2, "r") as f:
+with open(Args.Story2, "r", encoding="utf-8") as f:
     Story2 = json.loads(f.read())
 
 
@@ -215,7 +215,7 @@ TotalEvalTime_s = round(EndTime_s - StartTime_s)
 
 # Optionally write Report To Disk
 if (Args.Output != ""):
-    with open(Args.Output, "w") as f:
+    with open(Args.Output, "w", encoding="utf-8") as f:
         f.write(Report)
 
 
