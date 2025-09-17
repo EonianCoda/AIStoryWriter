@@ -1,22 +1,22 @@
 INITIAL_OUTLINE_WRITER_MODEL = (
-    "ollama://llama3:70b"  # Note this value is overridden by the argparser
+    "ollama://qwen3:4b"  # Note this value is overridden by the argparser
 )
 CHAPTER_OUTLINE_WRITER_MODEL = (
-    "ollama://llama3:70b"  # Note this value is overridden by the argparser
+    "ollama://qwen3:4b"  # Note this value is overridden by the argparser
 )
-CHAPTER_STAGE1_WRITER_MODEL = "ollama://llama3:70b"  # Note this value is overridden by the argparser
-CHAPTER_STAGE2_WRITER_MODEL = "ollama://llama3:70b"  # Note this value is overridden by the argparser
-CHAPTER_STAGE3_WRITER_MODEL = "ollama://llama3:70b"  # Note this value is overridden by the argparser
-CHAPTER_STAGE4_WRITER_MODEL = "ollama://llama3:70b"  # Note this value is overridden by the argparser
+CHAPTER_STAGE1_WRITER_MODEL = "ollama://qwen3:4b"  # Note this value is overridden by the argparser
+CHAPTER_STAGE2_WRITER_MODEL = "ollama://qwen3:4b"  # Note this value is overridden by the argparser
+CHAPTER_STAGE3_WRITER_MODEL = "ollama://qwen3:4b"  # Note this value is overridden by the argparser
+CHAPTER_STAGE4_WRITER_MODEL = "ollama://qwen3:4b"  # Note this value is overridden by the argparser
 CHAPTER_REVISION_WRITER_MODEL = (
-    "ollama://llama3:70b"  # Note this value is overridden by the argparser
+    "ollama://qwen3:4b"  # Note this value is overridden by the argparser
 )
-REVISION_MODEL = "ollama://llama3:70b"  # Note this value is overridden by the argparser
-EVAL_MODEL = "ollama://llama3:70b"  # Note this value is overridden by the argparser
-INFO_MODEL = "ollama://llama3:70b"  # Note this value is overridden by the argparser
-SCRUB_MODEL = "ollama://llama3:70b"  # Note this value is overridden by the argparser
-CHECKER_MODEL = "ollama://llama3:70b"  # Model used to check results
-TRANSLATOR_MODEL = "ollama://llama3:70b"
+REVISION_MODEL = "ollama://qwen3:4b"  # Note this value is overridden by the argparser
+EVAL_MODEL = "ollama://qwen3:4b"  # Note this value is overridden by the argparser
+INFO_MODEL = "ollama://qwen3:4b"  # Note this value is overridden by the argparser
+SCRUB_MODEL = "ollama://qwen3:4b"  # Note this value is overridden by the argparser
+CHECKER_MODEL = "ollama://qwen3:4b"  # Model used to check results
+TRANSLATOR_MODEL = "ollama://qwen3:4b"
 
 OLLAMA_CTX = 8192
 
@@ -24,7 +24,7 @@ OLLAMA_HOST = "127.0.0.1:11434"
 
 SEED = 12  # Note this value is overridden by the argparser
 
-TRANSLATE_LANGUAGE = ""  # If the user wants to translate, this'll be changed from empty to a language e.g 'French' or 'Russian'
+TRANSLATE_LANGUAGE = "traditional chinese"  # If the user wants to translate, this'll be changed from empty to a language e.g 'French' or 'Russian'
 TRANSLATE_PROMPT_LANGUAGE = ""  # If the user wants to translate their prompt, this'll be changed from empty to a language e.g 'French' or 'Russian'
 
 OUTLINE_QUALITY = 87  # Note this value is overridden by the argparser
@@ -46,7 +46,7 @@ OPTIONAL_OUTPUT_NAME = ""
 DEBUG = False
 
 # Tested models:
-"llama3:70b"  # works as editor model, DO NOT use as writer model, it sucks
+"qwen3:4b"  # works as editor model, DO NOT use as writer model, it sucks
 "vanilj/midnight-miqu-70b-v1.5"  # works rather well as the writer, not well as anything else
 "command-r"
 "qwen:72b"
