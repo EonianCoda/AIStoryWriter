@@ -14,7 +14,7 @@ import writer.print_utils
 
 def EvaluateOutline(_Client, _Logger, _Outline1, _Outline2):
     
-    _Logger.Log(f"Evaluating Outlines From Story", 4)
+    _Logger.log(f"Evaluating Outlines From Story", 4)
     Messages = [_Client.BuildSystemQuery("You are a helpful AI language model.")]
     Messages.append(_Client.BuildUserQuery(f"""
 Please evaluate which outlines are better from the following two outlines:
@@ -71,14 +71,14 @@ Do not respond with anything except JSON. Do not include any other fields except
     Report += f"Winner of Narrative: {JSON['Narrative']}\n"
     Report += f"Overall Winner: {JSON['OverallWinner']}\n"
     
-    _Logger.Log(f"Finished Evaluating Outlines From Story", 4)
+    _Logger.log(f"Finished Evaluating Outlines From Story", 4)
 
     return Report, JSON
 
 
 def EvaluateChapter(_Client, _Logger, _ChapterA, _ChapterB):
     
-    _Logger.Log(f"Evaluating Outlines From Story", 4)
+    _Logger.log(f"Evaluating Outlines From Story", 4)
     Messages = [_Client.BuildSystemQuery("You are a helpful AI language model.")]
     Messages.append(_Client.BuildUserQuery(f"""
 Please evaluate which of the two unrelated and separate chapters is better based on the following criteria: Plot, Chapters, Style, Dialogue, Tropes, Genre, and Narrative.
@@ -145,7 +145,7 @@ Emphasize Chapter A and B as you rate the result.
     Report += f"Winner of Narrative: {JSON['Narrative']}\n"
     Report += f"Overall Winner: {JSON['OverallWinner']}\n"
     
-    _Logger.Log(f"Finished Evaluating Outlines From Story", 4)
+    _Logger.log(f"Finished Evaluating Outlines From Story", 4)
 
     return Report, JSON
 
