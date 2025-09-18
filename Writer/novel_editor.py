@@ -1,6 +1,6 @@
-import Writer.PrintUtils
-import Writer.Config
-import Writer.Prompts
+import writer.print_utils
+import writer.config
+import writer.prompts
 
 
 def EditNovel(Interface, _Logger, _Chapters: list, _Outline: str, _TotalChapters: int):
@@ -13,7 +13,7 @@ def EditNovel(Interface, _Logger, _Chapters: list, _Outline: str, _TotalChapters
         for Chapter in EditedChapters:
             NovelText += Chapter
 
-        Prompt: str = Writer.Prompts.CHAPTER_EDIT_PROMPT.format(
+        Prompt: str = writer.prompts.CHAPTER_EDIT_PROMPT.format(
             _Chapter=EditedChapters[i], NovelText=NovelText, i=i
         )
 
@@ -23,13 +23,13 @@ def EditNovel(Interface, _Logger, _Chapters: list, _Outline: str, _TotalChapters
         Messages = []
         Messages.append(Interface.BuildUserQuery(Prompt))
         Messages = Interface.SafeGenerateText(
-            _Logger, Messages, Writer.Config.CHAPTER_WRITER_MODEL
+            _Logger, Messages, writer.config.CHAPTER_WRITER_MODEL
         )
         _Logger.Log(f"Finished Chapter {i} Second Pass In-Place Edit", 5)
 
         NewChapter = Interface.GetLastMessageText(Messages)
         EditedChapters[i] = NewChapter
-        ChapterWordCount = Writer.Statistics.GetWordCount(NewChapter)
+        ChapterWordCount = writer.statistics.GetWordCount(NewChapter)
         _Logger.Log(f"New Chapter Word Count: {ChapterWordCount}", 3)
 
     return EditedChapters

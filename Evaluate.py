@@ -6,9 +6,9 @@ import json
 import datetime
 import os
 
-import Writer.Interface.Wrapper
-import Writer.Config
-import Writer.PrintUtils
+import writer.Interface.Wrapper
+import writer.config
+import writer.print_utils
 
 
 
@@ -163,18 +163,18 @@ Parser.add_argument("-Model", default="ollama://command-r-plus", type=str, help=
 
 Args = Parser.parse_args()
 
-Writer.Config.OLLAMA_HOST = Args.Host
-# Writer.Config.DEBUG = True
+writer.config.OLLAMA_HOST = Args.Host
+# writer.config.DEBUG = True
 
 
 # Measure Generation Time
 StartTime_s = time.time()
 
 # Setup Logger
-Logger = Writer.PrintUtils.Logger("EvalLogs")
+Logger = writer.print_utils.Logger("EvalLogs")
 
 # Setup Logger
-Interface = Writer.Interface.Wrapper.Interface([Args.Model])
+Interface = writer.Interface.Wrapper.Interface([Args.Model])
 
 # Load the initial story
 Story1:dict = {}

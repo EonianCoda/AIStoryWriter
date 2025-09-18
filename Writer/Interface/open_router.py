@@ -125,7 +125,7 @@ class OpenRouter:
         messages = self.ensure_array(messages)
         headers = {
             "Authorization": f"Bearer {self.api_key}",
-            'HTTP-Referer': 'https://github.com/datacrystals/AIStoryWriter',
+            'HTTP-Referer': 'https://github.com/datacrystals/AIStorywriter',
             'X-Title': 'StoryForgeAI',
         }
         body={

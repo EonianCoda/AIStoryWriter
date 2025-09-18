@@ -1,12 +1,12 @@
 import json
 
-import Writer.LLMEditor
-import Writer.PrintUtils
-import Writer.Config
-import Writer.Chapter.ChapterGenSummaryCheck
-import Writer.Prompts
+import writer.llm_editor
+import writer.print_utils
+import writer.config
+import writer.chapter.chapter_gen_summary_check
+import writer.prompts
 
-import Writer.Scene.ChapterByScene
+import writer.scene.chapter_by_scene
 
 def GenerateChapter(
     Interface,
@@ -27,7 +27,7 @@ def GenerateChapter(
     MesssageHistory: list = []
     MesssageHistory.append(
         Interface.BuildSystemQuery(
-            Writer.Prompts.CHAPTER_GENERATION_INTRO.format(
+            writer.prompts.CHAPTER_GENERATION_INTRO.format(
                 _ChapterNum=_ChapterNum, _TotalChapters=_TotalChapters
             )
         )
@@ -41,7 +41,7 @@ def GenerateChapter(
         for Chapter in _Chapters:
             ChapterSuperlist += f"{Chapter}\n"
 
-        ContextHistoryInsert += Writer.Prompts.CHAPTER_HISTORY_INSERT.format(
+        ContextHistoryInsert += writer.prompts.CHAPTER_HISTORY_INSERT.format(
             _Outline=_Outline, ChapterSuperlist=ChapterSuperlist
         )
 
@@ -57,11 +57,11 @@ def GenerateChapter(
     ThisChapterOutline: str = ""
     ChapterSegmentMessages = []
     ChapterSegmentMessages.append(
-        Interface.BuildSystemQuery(Writer.Prompts.CHAPTER_GENERATION_INTRO)
+        Interface.BuildSystemQuery(writer.prompts.CHAPTER_GENERATION_INTRO)
     )
     ChapterSegmentMessages.append(
         Interface.BuildUserQuery(
-            Writer.Prompts.CHAPTER_GENERATION_PROMPT.format(
+            writer.prompts.CHAPTER_GENERATION_PROMPT.format(
                 _Outline=_Outline, _ChapterNum=_ChapterNum
             )
         )
@@ -69,7 +69,7 @@ def GenerateChapter(
     ChapterSegmentMessages = Interface.SafeGenerateText(
         _Logger,
         ChapterSegmentMessages,
-        Writer.Config.CHAPTER_STAGE1_WRITER_MODEL, _MinWordCount=120
+        writer.config.CHAPTER_STAGE1_WRITER_MODEL, _MinWordCount=120
     )  # CHANGE THIS MODEL EVENTUALLY - BUT IT WORKS FOR NOW!!!
     ThisChapterOutline: str = Interface.GetLastMessageText(ChapterSegmentMessages)
     _Logger.Log(f"Created Chapter Specific Outline", 4)
@@ -80,11 +80,11 @@ def GenerateChapter(
         _Logger.Log(f"Creating Summary Of Last Chapter Info", 3)
         ChapterSummaryMessages = []
         ChapterSummaryMessages.append(
-            Interface.BuildSystemQuery(Writer.Prompts.CHAPTER_SUMMARY_INTRO)
+            Interface.BuildSystemQuery(writer.prompts.CHAPTER_SUMMARY_INTRO)
         )
         ChapterSummaryMessages.append(
             Interface.BuildUserQuery(
-                Writer.Prompts.CHAPTER_SUMMARY_PROMPT.format(
+                writer.prompts.CHAPTER_SUMMARY_PROMPT.format(
                     _ChapterNum=_ChapterNum,
                     _TotalChapters=_TotalChapters,
                     _Outline=_Outline,
@@ -95,7 +95,7 @@ def GenerateChapter(
         ChapterSummaryMessages = Interface.SafeGenerateText(
             _Logger,
             ChapterSummaryMessages,
-            Writer.Config.CHAPTER_STAGE1_WRITER_MODEL, _MinWordCount=100
+            writer.config.CHAPTER_STAGE1_WRITER_MODEL, _MinWordCount=100
         )  # CHANGE THIS MODEL EVENTUALLY - BUT IT WORKS FOR NOW!!!
         FormattedLastChapterSummary: str = Interface.GetLastMessageText(
             ChapterSummaryMessages
@@ -111,13 +111,13 @@ def GenerateChapter(
 
     # If scene generation disabled, use the normal initial plot generator
     Stage1Chapter = ""
-    if (not Writer.Config.SCENE_GENERATION_PIPELINE):
+    if (not writer.config.SCENE_GENERATION_PIPELINE):
 
         #### STAGE 1: Create Initial Plot
         IterCounter: int = 0
         Feedback: str = ""
         while True:
-            Prompt = Writer.Prompts.CHAPTER_GENERATION_STAGE1.format(
+            Prompt = writer.prompts.CHAPTER_GENERATION_STAGE1.format(
                 ContextHistoryInsert=ContextHistoryInsert,
                 _ChapterNum=_ChapterNum,
                 _TotalChapters=_TotalChapters,
@@ -138,8 +138,8 @@ def GenerateChapter(
             Messages = Interface.SafeGenerateText(
                 _Logger,
                 Messages,
-                Writer.Config.CHAPTER_STAGE1_WRITER_MODEL,
-                _SeedOverride=IterCounter + Writer.Config.SEED,
+                writer.config.CHAPTER_STAGE1_WRITER_MODEL,
+                _SeedOverride=IterCounter + writer.config.SEED,
                 _MinWordCount=100
             )
             IterCounter += 1
@@ -150,12 +150,12 @@ def GenerateChapter(
             )
 
             # Check if LLM did the work
-            if IterCounter > Writer.Config.CHAPTER_MAX_REVISIONS:
+            if IterCounter > writer.config.CHAPTER_MAX_REVISIONS:
                 _Logger.Log(
                     "Chapter Summary-Based Revision Seems Stuck - Forcefully Exiting", 7
                 )
                 break
-            Result, Feedback = Writer.Chapter.ChapterGenSummaryCheck.LLMSummaryCheck(
+            Result, Feedback = writer.chapter.chapter_gen_summary_check.LLMSummaryCheck(
                 Interface, _Logger, DetailedChapterOutline, Stage1Chapter
             )
             if Result:
@@ -167,7 +167,7 @@ def GenerateChapter(
     
     else:
 
-        Stage1Chapter = Writer.Scene.ChapterByScene.ChapterByScene(Interface, _Logger, ThisChapterOutline, _Outline, _BaseContext)
+        Stage1Chapter = writer.scene.chapter_by_scene.ChapterByScene(Interface, _Logger, ThisChapterOutline, _Outline, _BaseContext)
 
 
     #### STAGE 2: Add Character Development
@@ -175,7 +175,7 @@ def GenerateChapter(
     IterCounter: int = 0
     Feedback: str = ""
     while True:
-        Prompt = Writer.Prompts.CHAPTER_GENERATION_STAGE2.format(
+        Prompt = writer.prompts.CHAPTER_GENERATION_STAGE2.format(
             ContextHistoryInsert=ContextHistoryInsert,
             _ChapterNum=_ChapterNum,
             _TotalChapters=_TotalChapters,
@@ -197,8 +197,8 @@ def GenerateChapter(
         Messages = Interface.SafeGenerateText(
             _Logger,
             Messages,
-            Writer.Config.CHAPTER_STAGE2_WRITER_MODEL,
-            _SeedOverride=IterCounter + Writer.Config.SEED,
+            writer.config.CHAPTER_STAGE2_WRITER_MODEL,
+            _SeedOverride=IterCounter + writer.config.SEED,
             _MinWordCount=100
         )
         IterCounter += 1
@@ -209,12 +209,12 @@ def GenerateChapter(
         )
 
         # Check if LLM did the work
-        if IterCounter > Writer.Config.CHAPTER_MAX_REVISIONS:
+        if IterCounter > writer.config.CHAPTER_MAX_REVISIONS:
             _Logger.Log(
                 "Chapter Summary-Based Revision Seems Stuck - Forcefully Exiting", 7
             )
             break
-        Result, Feedback = Writer.Chapter.ChapterGenSummaryCheck.LLMSummaryCheck(
+        Result, Feedback = writer.chapter.chapter_gen_summary_check.LLMSummaryCheck(
             Interface, _Logger, DetailedChapterOutline, Stage2Chapter
         )
         if Result:
@@ -229,7 +229,7 @@ def GenerateChapter(
     IterCounter: int = 0
     Feedback: str = ""
     while True:
-        Prompt = Writer.Prompts.CHAPTER_GENERATION_STAGE3.format(
+        Prompt = writer.prompts.CHAPTER_GENERATION_STAGE3.format(
             ContextHistoryInsert=ContextHistoryInsert,
             _ChapterNum=_ChapterNum,
             _TotalChapters=_TotalChapters,
@@ -250,8 +250,8 @@ def GenerateChapter(
         Messages = Interface.SafeGenerateText(
             _Logger,
             Messages,
-            Writer.Config.CHAPTER_STAGE3_WRITER_MODEL,
-            _SeedOverride=IterCounter + Writer.Config.SEED,
+            writer.config.CHAPTER_STAGE3_WRITER_MODEL,
+            _SeedOverride=IterCounter + writer.config.SEED,
             _MinWordCount=100
         )
         IterCounter += 1
@@ -262,12 +262,12 @@ def GenerateChapter(
         )
 
         # Check if LLM did the work
-        if IterCounter > Writer.Config.CHAPTER_MAX_REVISIONS:
+        if IterCounter > writer.config.CHAPTER_MAX_REVISIONS:
             _Logger.Log(
                 "Chapter Summary-Based Revision Seems Stuck - Forcefully Exiting", 7
             )
             break
-        Result, Feedback = Writer.Chapter.ChapterGenSummaryCheck.LLMSummaryCheck(
+        Result, Feedback = writer.chapter.chapter_gen_summary_check.LLMSummaryCheck(
             Interface, _Logger, DetailedChapterOutline, Stage3Chapter
         )
         if Result:
@@ -278,7 +278,7 @@ def GenerateChapter(
             break
 
         #     #### STAGE 4: Final-Pre-Revision Edit Pass
-        # Prompt = Writer.Prompts.CHAPTER_GENERATION_STAGE4.format(
+        # Prompt = writer.prompts.CHAPTER_GENERATION_STAGE4.format(
         #    ContextHistoryInsert=ContextHistoryInsert,
         #     _ChapterNum=_ChapterNum,
         #     _TotalChapters=_TotalChapters,
@@ -292,13 +292,13 @@ def GenerateChapter(
     #     Messages = MesssageHistory.copy()
     #     Messages.append(Interface.BuildUserQuery(Prompt))
 
-    #     Messages = Interface.SafeGenerateText(_Logger, Messages, Writer.Config.CHAPTER_STAGE4_WRITER_MODEL)
+    #     Messages = Interface.SafeGenerateText(_Logger, Messages, writer.config.CHAPTER_STAGE4_WRITER_MODEL)
     #     Chapter:str = Interface.GetLastMessageText(Messages)
     #     _Logger.Log(f"Done Generating Initial Chapter (Stage 4: Final Pass)  {_ChapterNum}/{_TotalChapters}", 5)
     Chapter: str = Stage3Chapter
 
     #### Stage 5: Revision Cycle
-    if Writer.Config.CHAPTER_NO_REVISIONS:
+    if writer.config.CHAPTER_NO_REVISIONS:
         _Logger.Log(f"Chapter Revision Disabled In Config, Exiting Now", 5)
         return Chapter
 
@@ -311,14 +311,14 @@ def GenerateChapter(
     Iterations: int = 0
     while True:
         Iterations += 1
-        Feedback = Writer.LLMEditor.GetFeedbackOnChapter(
+        Feedback = writer.llm_editor.GetFeedbackOnChapter(
             Interface, _Logger, Chapter, _Outline
         )
-        Rating = Writer.LLMEditor.GetChapterRating(Interface, _Logger, Chapter)
+        Rating = writer.llm_editor.GetChapterRating(Interface, _Logger, Chapter)
 
-        if Iterations > Writer.Config.CHAPTER_MAX_REVISIONS:
+        if Iterations > writer.config.CHAPTER_MAX_REVISIONS:
             break
-        if (Iterations > Writer.Config.CHAPTER_MIN_REVISIONS) and (Rating == True):
+        if (Iterations > writer.config.CHAPTER_MIN_REVISIONS) and (Rating == True):
             break
         Chapter, WritingHistory = ReviseChapter(
             Interface, _Logger, Chapter, Feedback, WritingHistory
@@ -334,7 +334,7 @@ def GenerateChapter(
 
 def ReviseChapter(Interface, _Logger, _Chapter, _Feedback, _History: list = []):
 
-    RevisionPrompt = Writer.Prompts.CHAPTER_REVISION.format(
+    RevisionPrompt = writer.prompts.CHAPTER_REVISION.format(
         _Chapter=_Chapter, _Feedback=_Feedback
     )
 
@@ -342,7 +342,7 @@ def ReviseChapter(Interface, _Logger, _Chapter, _Feedback, _History: list = []):
     Messages = _History
     Messages.append(Interface.BuildUserQuery(RevisionPrompt))
     Messages = Interface.SafeGenerateText(
-        _Logger, Messages, Writer.Config.CHAPTER_REVISION_WRITER_MODEL,
+        _Logger, Messages, writer.config.CHAPTER_REVISION_WRITER_MODEL,
         _MinWordCount=100
     )
     SummaryText: str = Interface.GetLastMessageText(Messages)

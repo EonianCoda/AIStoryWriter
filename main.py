@@ -6,18 +6,18 @@ import datetime
 import os
 import json
 
-import Writer.Config
+import writer.config
 
-import Writer.Interface.Wrapper
-import Writer.PrintUtils
-import Writer.Chapter.ChapterDetector
-import Writer.Scrubber
-import Writer.Statistics
-import Writer.OutlineGenerator
-import Writer.Chapter.ChapterGenerator
-import Writer.StoryInfo
-import Writer.NovelEditor
-import Writer.Translator
+import writer.interface.wrapper
+import writer.print_utils
+import writer.chapter.chapter_detector
+import writer.scrubber
+import writer.statistics
+import writer.outline_generator
+import writer.chapter.chapter_generator
+import writer.story_info
+import writer.novel_editor
+import writer.translator
 
 
 # Setup Argparser
@@ -31,79 +31,79 @@ Parser.add_argument(
 )
 Parser.add_argument(
     "-InitialOutlineModel",
-    default=Writer.Config.INITIAL_OUTLINE_WRITER_MODEL,
+    default=writer.config.INITIAL_OUTLINE_WRITER_MODEL,
     type=str,
     help="Model to use for writing the base outline content",
 )
 Parser.add_argument(
     "-ChapterOutlineModel",
-    default=Writer.Config.CHAPTER_OUTLINE_WRITER_MODEL,
+    default=writer.config.CHAPTER_OUTLINE_WRITER_MODEL,
     type=str,
     help="Model to use for writing the per-chapter outline content",
 )
 Parser.add_argument(
     "-ChapterS1Model",
-    default=Writer.Config.CHAPTER_STAGE1_WRITER_MODEL,
+    default=writer.config.CHAPTER_STAGE1_WRITER_MODEL,
     type=str,
     help="Model to use for writing the chapter (stage 1: plot)",
 )
 Parser.add_argument(
     "-ChapterS2Model",
-    default=Writer.Config.CHAPTER_STAGE2_WRITER_MODEL,
+    default=writer.config.CHAPTER_STAGE2_WRITER_MODEL,
     type=str,
     help="Model to use for writing the chapter (stage 2: character development)",
 )
 Parser.add_argument(
     "-ChapterS3Model",
-    default=Writer.Config.CHAPTER_STAGE3_WRITER_MODEL,
+    default=writer.config.CHAPTER_STAGE3_WRITER_MODEL,
     type=str,
     help="Model to use for writing the chapter (stage 3: dialogue)",
 )
 Parser.add_argument(
     "-ChapterS4Model",
-    default=Writer.Config.CHAPTER_STAGE4_WRITER_MODEL,
+    default=writer.config.CHAPTER_STAGE4_WRITER_MODEL,
     type=str,
     help="Model to use for writing the chapter (stage 4: final correction pass)",
 )
 Parser.add_argument(
     "-ChapterRevisionModel",
-    default=Writer.Config.CHAPTER_REVISION_WRITER_MODEL,
+    default=writer.config.CHAPTER_REVISION_WRITER_MODEL,
     type=str,
     help="Model to use for revising the chapter until it meets criteria",
 )
 Parser.add_argument(
     "-RevisionModel",
-    default=Writer.Config.REVISION_MODEL,
+    default=writer.config.REVISION_MODEL,
     type=str,
     help="Model to use for generating constructive criticism",
 )
 Parser.add_argument(
     "-EvalModel",
-    default=Writer.Config.EVAL_MODEL,
+    default=writer.config.EVAL_MODEL,
     type=str,
     help="Model to use for evaluating the rating out of 100",
 )
 Parser.add_argument(
     "-InfoModel",
-    default=Writer.Config.INFO_MODEL,
+    default=writer.config.INFO_MODEL,
     type=str,
     help="Model to use when generating summary/info at the end",
 )
 Parser.add_argument(
     "-ScrubModel",
-    default=Writer.Config.SCRUB_MODEL,
+    default=writer.config.SCRUB_MODEL,
     type=str,
     help="Model to use when scrubbing the story at the end",
 )
 Parser.add_argument(
     "-CheckerModel",
-    default=Writer.Config.CHECKER_MODEL,
+    default=writer.config.CHECKER_MODEL,
     type=str,
     help="Model to use when checking if the LLM cheated or not",
 )
 Parser.add_argument(
     "-TranslatorModel",
-    default=Writer.Config.TRANSLATOR_MODEL,
+    default=writer.config.TRANSLATOR_MODEL,
     type=str,
     help="Model to use if translation of the story is enabled",
 )
@@ -181,65 +181,65 @@ Args = Parser.parse_args()
 StartTime = time.time()
 
 
-# Setup Config
-Writer.Config.SEED = Args.Seed
+# Setup config
+writer.config.SEED = Args.Seed
 
-Writer.Config.INITIAL_OUTLINE_WRITER_MODEL = Args.InitialOutlineModel
-Writer.Config.CHAPTER_OUTLINE_WRITER_MODEL = Args.ChapterOutlineModel
-Writer.Config.CHAPTER_STAGE1_WRITER_MODEL = Args.ChapterS1Model
-Writer.Config.CHAPTER_STAGE2_WRITER_MODEL = Args.ChapterS2Model
-Writer.Config.CHAPTER_STAGE3_WRITER_MODEL = Args.ChapterS3Model
-Writer.Config.CHAPTER_STAGE4_WRITER_MODEL = Args.ChapterS4Model
-Writer.Config.CHAPTER_REVISION_WRITER_MODEL = Args.ChapterRevisionModel
-Writer.Config.EVAL_MODEL = Args.EvalModel
-Writer.Config.REVISION_MODEL = Args.RevisionModel
-Writer.Config.INFO_MODEL = Args.InfoModel
-Writer.Config.SCRUB_MODEL = Args.ScrubModel
-Writer.Config.CHECKER_MODEL = Args.CheckerModel
-Writer.Config.TRANSLATOR_MODEL = Args.TranslatorModel
+writer.config.INITIAL_OUTLINE_WRITER_MODEL = Args.InitialOutlineModel
+writer.config.CHAPTER_OUTLINE_WRITER_MODEL = Args.ChapterOutlineModel
+writer.config.CHAPTER_STAGE1_WRITER_MODEL = Args.ChapterS1Model
+writer.config.CHAPTER_STAGE2_WRITER_MODEL = Args.ChapterS2Model
+writer.config.CHAPTER_STAGE3_WRITER_MODEL = Args.ChapterS3Model
+writer.config.CHAPTER_STAGE4_WRITER_MODEL = Args.ChapterS4Model
+writer.config.CHAPTER_REVISION_WRITER_MODEL = Args.ChapterRevisionModel
+writer.config.EVAL_MODEL = Args.EvalModel
+writer.config.REVISION_MODEL = Args.RevisionModel
+writer.config.INFO_MODEL = Args.InfoModel
+writer.config.SCRUB_MODEL = Args.ScrubModel
+writer.config.CHECKER_MODEL = Args.CheckerModel
+writer.config.TRANSLATOR_MODEL = Args.TranslatorModel
 
-Writer.Config.TRANSLATE_LANGUAGE = Args.Translate
-Writer.Config.TRANSLATE_PROMPT_LANGUAGE = Args.TranslatePrompt
+writer.config.TRANSLATE_LANGUAGE = Args.Translate
+writer.config.TRANSLATE_PROMPT_LANGUAGE = Args.TranslatePrompt
 
-Writer.Config.OUTLINE_MIN_REVISIONS = Args.OutlineMinRevisions
-Writer.Config.OUTLINE_MAX_REVISIONS = Args.OutlineMaxRevisions
+writer.config.OUTLINE_MIN_REVISIONS = Args.OutlineMinRevisions
+writer.config.OUTLINE_MAX_REVISIONS = Args.OutlineMaxRevisions
 
-Writer.Config.CHAPTER_MIN_REVISIONS = Args.ChapterMinRevisions
-Writer.Config.CHAPTER_MAX_REVISIONS = Args.ChapterMaxRevisions
-Writer.Config.CHAPTER_NO_REVISIONS = Args.NoChapterRevision
+writer.config.CHAPTER_MIN_REVISIONS = Args.ChapterMinRevisions
+writer.config.CHAPTER_MAX_REVISIONS = Args.ChapterMaxRevisions
+writer.config.CHAPTER_NO_REVISIONS = Args.NoChapterRevision
 
-Writer.Config.SCRUB_NO_SCRUB = Args.NoScrubChapters
-Writer.Config.EXPAND_OUTLINE = Args.ExpandOutline
-Writer.Config.ENABLE_FINAL_EDIT_PASS = Args.EnableFinalEditPass
+writer.config.SCRUB_NO_SCRUB = Args.NoScrubChapters
+writer.config.EXPAND_OUTLINE = Args.ExpandOutline
+writer.config.ENABLE_FINAL_EDIT_PASS = Args.EnableFinalEditPass
 
-Writer.Config.OPTIONAL_OUTPUT_NAME = Args.Output
-Writer.Config.SCENE_GENERATION_PIPELINE = Args.SceneGenerationPipeline
-Writer.Config.DEBUG = Args.Debug
+writer.config.OPTIONAL_OUTPUT_NAME = Args.Output
+writer.config.SCENE_GENERATION_PIPELINE = Args.SceneGenerationPipeline
+writer.config.DEBUG = Args.Debug
 
 # Get a list of all used providers
 Models = [
-    Writer.Config.INITIAL_OUTLINE_WRITER_MODEL,
-    Writer.Config.CHAPTER_OUTLINE_WRITER_MODEL,
-    Writer.Config.CHAPTER_STAGE1_WRITER_MODEL,
-    Writer.Config.CHAPTER_STAGE2_WRITER_MODEL,
-    Writer.Config.CHAPTER_STAGE3_WRITER_MODEL,
-    Writer.Config.CHAPTER_STAGE4_WRITER_MODEL,
-    Writer.Config.CHAPTER_REVISION_WRITER_MODEL,
-    Writer.Config.EVAL_MODEL,
-    Writer.Config.REVISION_MODEL,
-    Writer.Config.INFO_MODEL,
-    Writer.Config.SCRUB_MODEL,
-    Writer.Config.CHECKER_MODEL,
-    Writer.Config.TRANSLATOR_MODEL,
+    writer.config.INITIAL_OUTLINE_WRITER_MODEL,
+    writer.config.CHAPTER_OUTLINE_WRITER_MODEL,
+    writer.config.CHAPTER_STAGE1_WRITER_MODEL,
+    writer.config.CHAPTER_STAGE2_WRITER_MODEL,
+    writer.config.CHAPTER_STAGE3_WRITER_MODEL,
+    writer.config.CHAPTER_STAGE4_WRITER_MODEL,
+    writer.config.CHAPTER_REVISION_WRITER_MODEL,
+    writer.config.EVAL_MODEL,
+    writer.config.REVISION_MODEL,
+    writer.config.INFO_MODEL,
+    writer.config.SCRUB_MODEL,
+    writer.config.CHECKER_MODEL,
+    writer.config.TRANSLATOR_MODEL,
 ]
 Models = list(set(Models))
 
 # Setup Logger
-SysLogger = Writer.PrintUtils.Logger()
+SysLogger = writer.print_utils.Logger()
 
-# Initialize Interface
-SysLogger.Log("Created OLLAMA Interface", 5)
-Interface = Writer.Interface.Wrapper.Interface(Models)
+# Initialize interface
+SysLogger.Log("Created OLLAMA interface", 5)
+interface = writer.interface.wrapper.Interface(Models)
 
 # Load User Prompt
 Prompt: str = ""
@@ -250,24 +250,24 @@ with open(Args.Prompt, "r", encoding="utf-8") as f:
 
 
 # If user wants their prompt translated, do so
-if Writer.Config.TRANSLATE_PROMPT_LANGUAGE != "":
-    Prompt = Writer.Translator.TranslatePrompt(
-        Interface, SysLogger, Prompt, Writer.Config.TRANSLATE_PROMPT_LANGUAGE
+if writer.config.TRANSLATE_PROMPT_LANGUAGE != "":
+    Prompt = writer.translator.TranslatePrompt(
+        interface, SysLogger, Prompt, writer.config.TRANSLATE_PROMPT_LANGUAGE
     )
 
 
 # Generate the Outline
-Outline, Elements, RoughChapterOutline, BaseContext = Writer.OutlineGenerator.GenerateOutline(
-    Interface, SysLogger, Prompt, Writer.Config.OUTLINE_QUALITY
+Outline, Elements, RoughChapterOutline, BaseContext = writer.outline_generator.GenerateOutline(
+    interface, SysLogger, Prompt, writer.config.OUTLINE_QUALITY
 )
 BasePrompt = Prompt
 
 
 # Detect the number of chapters
 SysLogger.Log("Detecting Chapters", 5)
-Messages = [Interface.BuildUserQuery(Outline)]
-NumChapters: int = Writer.Chapter.ChapterDetector.LLMCountChapters(
-    Interface, SysLogger, Interface.GetLastMessageText(Messages)
+Messages = [interface.BuildUserQuery(Outline)]
+NumChapters: int = writer.chapter.chapter_detector.LLMCountChapters(
+    interface, SysLogger, interface.GetLastMessageText(Messages)
 )
 SysLogger.Log(f"Found {NumChapters} Chapter(s)", 5)
 
@@ -281,12 +281,12 @@ Please help me expand upon the following outline, chapter by chapter.
 ```
     
 """
-Messages = [Interface.BuildUserQuery(Prompt)]
+Messages = [interface.BuildUserQuery(Prompt)]
 ChapterOutlines: list = []
-if Writer.Config.EXPAND_OUTLINE:
+if writer.config.EXPAND_OUTLINE:
     for Chapter in range(1, NumChapters + 1):
-        ChapterOutline, Messages = Writer.OutlineGenerator.GeneratePerChapterOutline(
-            Interface, SysLogger, Chapter, Outline, Messages
+        ChapterOutline, Messages = writer.outline_generator.GeneratePerChapterOutline(
+            interface, SysLogger, Chapter, Outline, Messages
         )
         ChapterOutlines.append(ChapterOutline)
 
@@ -307,7 +307,7 @@ MegaOutline: str = f"""
 
 # Setup Base Prompt For Per-Chapter Generation
 UsedOutline: str = Outline
-if Writer.Config.EXPAND_OUTLINE:
+if writer.config.EXPAND_OUTLINE:
     UsedOutline = MegaOutline
 
 
@@ -316,20 +316,20 @@ SysLogger.Log("Starting Chapter Writing", 5)
 Chapters = []
 for i in range(1, NumChapters + 1):
 
-    Chapter = Writer.Chapter.ChapterGenerator.GenerateChapter(
-        Interface,
+    Chapter = writer.chapter.chapter_generator.GenerateChapter(
+        interface,
         SysLogger,
         i,
         NumChapters,
         Outline,
         Chapters,
-        Writer.Config.OUTLINE_QUALITY,
+        writer.config.OUTLINE_QUALITY,
         BaseContext,
     )
 
     Chapter = f"### Chapter {i}\n\n{Chapter}"
     Chapters.append(Chapter)
-    ChapterWordCount = Writer.Statistics.GetWordCount(Chapter)
+    ChapterWordCount = writer.statistics.GetWordCount(Chapter)
     SysLogger.Log(f"Chapter Word Count: {ChapterWordCount}", 2)
 
 
@@ -340,27 +340,27 @@ StoryInfoJSON.update({"StoryElements": Elements})
 StoryInfoJSON.update({"RoughChapterOutline": RoughChapterOutline})
 StoryInfoJSON.update({"BaseContext": BaseContext})
 
-if Writer.Config.ENABLE_FINAL_EDIT_PASS:
-    NewChapters = Writer.NovelEditor.EditNovel(
-        Interface, SysLogger, Chapters, Outline, NumChapters
+if writer.config.ENABLE_FINAL_EDIT_PASS:
+    NewChapters = writer.novel_editor.EditNovel(
+        interface, SysLogger, Chapters, Outline, NumChapters
     )
 NewChapters = Chapters
 StoryInfoJSON.update({"UnscrubbedChapters": NewChapters})
 
 # Now scrub it (if enabled)
-if not Writer.Config.SCRUB_NO_SCRUB:
-    NewChapters = Writer.Scrubber.ScrubNovel(
-        Interface, SysLogger, NewChapters, NumChapters
+if not writer.config.SCRUB_NO_SCRUB:
+    NewChapters = writer.scrubber.ScrubNovel(
+        interface, SysLogger, NewChapters, NumChapters
     )
 else:
-    SysLogger.Log(f"Skipping Scrubbing Due To Config", 4)
+    SysLogger.Log(f"Skipping Scrubbing Due To config", 4)
 StoryInfoJSON.update({"ScrubbedChapter": NewChapters})
 
 
 # If enabled, translate the novel
-if Writer.Config.TRANSLATE_LANGUAGE != "":
-    NewChapters = Writer.Translator.TranslateNovel(
-        Interface, SysLogger, NewChapters, NumChapters, Writer.Config.TRANSLATE_LANGUAGE
+if writer.config.TRANSLATE_LANGUAGE != "":
+    NewChapters = writer.translator.TranslateNovel(
+        interface, SysLogger, NewChapters, NumChapters, writer.config.TRANSLATE_LANGUAGE
     )
 else:
     SysLogger.Log(f"No Novel Translation Requested, Skipping Translation Step", 4)
@@ -374,8 +374,8 @@ for Chapter in NewChapters:
 
 # Now Generate Info
 Messages = []
-Messages.append(Interface.BuildUserQuery(Outline))
-Info = Writer.StoryInfo.GetStoryInfo(Interface, SysLogger, Messages)
+Messages.append(interface.BuildUserQuery(Outline))
+Info = writer.story_info.GetStoryInfo(interface, SysLogger, Messages)
 Title = Info["Title"]
 StoryInfoJSON.update({"Title": Info["Title"]})
 Summary = Info["Summary"]
@@ -393,7 +393,7 @@ ElapsedTime = time.time() - StartTime
 
 
 # Calculate Total Words
-TotalWords: int = Writer.Statistics.GetWordCount(StoryBodyText)
+TotalWords: int = writer.statistics.GetWordCount(StoryBodyText)
 SysLogger.Log(f"Story Total Word Count: {TotalWords}", 4)
 
 StatsString: str = "Work Statistics:  \n"
@@ -411,37 +411,37 @@ StatsString += f" - Base Prompt: {BasePrompt}  \n"
 StatsString += "\n\nGeneration Settings:  \n"
 StatsString += f" - Generator: AIStoryGenerator_2024-06-27  \n"
 StatsString += (
-    f" - Base Outline Writer Model: {Writer.Config.INITIAL_OUTLINE_WRITER_MODEL}  \n"
+    f" - Base Outline writer Model: {writer.config.INITIAL_OUTLINE_WRITER_MODEL}  \n"
 )
 StatsString += (
-    f" - Chapter Outline Writer Model: {Writer.Config.CHAPTER_OUTLINE_WRITER_MODEL}  \n"
+    f" - Chapter Outline writer Model: {writer.config.CHAPTER_OUTLINE_WRITER_MODEL}  \n"
 )
-StatsString += f" - Chapter Writer (Stage 1: Plot) Model: {Writer.Config.CHAPTER_STAGE1_WRITER_MODEL}  \n"
-StatsString += f" - Chapter Writer (Stage 2: Char Development) Model: {Writer.Config.CHAPTER_STAGE2_WRITER_MODEL}  \n"
-StatsString += f" - Chapter Writer (Stage 3: Dialogue) Model: {Writer.Config.CHAPTER_STAGE3_WRITER_MODEL}  \n"
-StatsString += f" - Chapter Writer (Stage 4: Final Pass) Model: {Writer.Config.CHAPTER_STAGE4_WRITER_MODEL}  \n"
-StatsString += f" - Chapter Writer (Revision) Model: {Writer.Config.CHAPTER_REVISION_WRITER_MODEL}  \n"
-StatsString += f" - Revision Model: {Writer.Config.REVISION_MODEL}  \n"
-StatsString += f" - Eval Model: {Writer.Config.EVAL_MODEL}  \n"
-StatsString += f" - Info Model: {Writer.Config.INFO_MODEL}  \n"
-StatsString += f" - Scrub Model: {Writer.Config.SCRUB_MODEL}  \n"
-StatsString += f" - Seed: {Writer.Config.SEED}  \n"
-# StatsString += f" - Outline Quality: {Writer.Config.OUTLINE_QUALITY}  \n"
-StatsString += f" - Outline Min Revisions: {Writer.Config.OUTLINE_MIN_REVISIONS}  \n"
-StatsString += f" - Outline Max Revisions: {Writer.Config.OUTLINE_MAX_REVISIONS}  \n"
-# StatsString += f" - Chapter Quality: {Writer.Config.CHAPTER_QUALITY}  \n"
-StatsString += f" - Chapter Min Revisions: {Writer.Config.CHAPTER_MIN_REVISIONS}  \n"
-StatsString += f" - Chapter Max Revisions: {Writer.Config.CHAPTER_MAX_REVISIONS}  \n"
-StatsString += f" - Chapter Disable Revisions: {Writer.Config.CHAPTER_NO_REVISIONS}  \n"
-StatsString += f" - Disable Scrubbing: {Writer.Config.SCRUB_NO_SCRUB}  \n"
+StatsString += f" - Chapter writer (Stage 1: Plot) Model: {writer.config.CHAPTER_STAGE1_WRITER_MODEL}  \n"
+StatsString += f" - Chapter writer (Stage 2: Char Development) Model: {writer.config.CHAPTER_STAGE2_WRITER_MODEL}  \n"
+StatsString += f" - Chapter writer (Stage 3: Dialogue) Model: {writer.config.CHAPTER_STAGE3_WRITER_MODEL}  \n"
+StatsString += f" - Chapter writer (Stage 4: Final Pass) Model: {writer.config.CHAPTER_STAGE4_WRITER_MODEL}  \n"
+StatsString += f" - Chapter writer (Revision) Model: {writer.config.CHAPTER_REVISION_WRITER_MODEL}  \n"
+StatsString += f" - Revision Model: {writer.config.REVISION_MODEL}  \n"
+StatsString += f" - Eval Model: {writer.config.EVAL_MODEL}  \n"
+StatsString += f" - Info Model: {writer.config.INFO_MODEL}  \n"
+StatsString += f" - Scrub Model: {writer.config.SCRUB_MODEL}  \n"
+StatsString += f" - Seed: {writer.config.SEED}  \n"
+# StatsString += f" - Outline Quality: {writer.config.OUTLINE_QUALITY}  \n"
+StatsString += f" - Outline Min Revisions: {writer.config.OUTLINE_MIN_REVISIONS}  \n"
+StatsString += f" - Outline Max Revisions: {writer.config.OUTLINE_MAX_REVISIONS}  \n"
+# StatsString += f" - Chapter Quality: {writer.config.CHAPTER_QUALITY}  \n"
+StatsString += f" - Chapter Min Revisions: {writer.config.CHAPTER_MIN_REVISIONS}  \n"
+StatsString += f" - Chapter Max Revisions: {writer.config.CHAPTER_MAX_REVISIONS}  \n"
+StatsString += f" - Chapter Disable Revisions: {writer.config.CHAPTER_NO_REVISIONS}  \n"
+StatsString += f" - Disable Scrubbing: {writer.config.SCRUB_NO_SCRUB}  \n"
 
 
 # Save The Story To Disk
 SysLogger.Log("Saving Story To Disk", 3)
 os.makedirs("Stories", exist_ok=True)
 FName = f"Stories/Story_{Title.replace(' ', '_')}"
-if Writer.Config.OPTIONAL_OUTPUT_NAME != "":
-    FName = Writer.Config.OPTIONAL_OUTPUT_NAME
+if writer.config.OPTIONAL_OUTPUT_NAME != "":
+    FName = writer.config.OPTIONAL_OUTPUT_NAME
 with open(f"{FName}.md", "w", encoding="utf-8") as F:
     Out = f"""
 {StatsString}

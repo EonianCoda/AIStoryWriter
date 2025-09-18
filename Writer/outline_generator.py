@@ -1,8 +1,8 @@
-import Writer.LLMEditor
-import Writer.PrintUtils
-import Writer.Config
-import Writer.Outline.StoryElements
-import Writer.Prompts
+import writer.llm_editor
+import writer.print_utils
+import writer.config
+import writer.outline.story_elements
+import writer.prompts
 
 
 # We should probably do outline generation in stages, allowing us to go back and add foreshadowing, etc back to previous segments
@@ -11,7 +11,7 @@ import Writer.Prompts
 def GenerateOutline(Interface, _Logger, _OutlinePrompt, _QualityThreshold: int = 85):
 
     # Get any important info about the base prompt to pass along
-    Prompt: str = Writer.Prompts.GET_IMPORTANT_BASE_PROMPT_INFO.format(
+    Prompt: str = writer.prompts.GET_IMPORTANT_BASE_PROMPT_INFO.format(
         _Prompt = _OutlinePrompt
     )
 
@@ -19,20 +19,20 @@ def GenerateOutline(Interface, _Logger, _OutlinePrompt, _QualityThreshold: int =
     _Logger.Log(f"Extracting Important Base Context", 4)
     Messages = [Interface.BuildUserQuery(Prompt)]
     Messages = Interface.SafeGenerateText(
-        _Logger, Messages, Writer.Config.INITIAL_OUTLINE_WRITER_MODEL
+        _Logger, Messages, writer.config.INITIAL_OUTLINE_WRITER_MODEL
     )
     BaseContext: str = Interface.GetLastMessageText(Messages)
     _Logger.Log(f"Done Extracting Important Base Context", 4)
 
 
     # Generate Story Elements
-    StoryElements: str = Writer.Outline.StoryElements.GenerateStoryElements(
+    StoryElements: str = writer.outline.story_elements.GenerateStoryElements(
         Interface, _Logger, _OutlinePrompt
     )
 
 
     # Now, Generate Initial Outline
-    Prompt: str = Writer.Prompts.INITIAL_OUTLINE_PROMPT.format(
+    Prompt: str = writer.prompts.INITIAL_OUTLINE_PROMPT.format(
         StoryElements=StoryElements, _OutlinePrompt=_OutlinePrompt
     )
 
@@ -40,7 +40,7 @@ def GenerateOutline(Interface, _Logger, _OutlinePrompt, _QualityThreshold: int =
     _Logger.Log(f"Generating Initial Outline", 4)
     Messages = [Interface.BuildUserQuery(Prompt)]
     Messages = Interface.SafeGenerateText(
-        _Logger, Messages, Writer.Config.INITIAL_OUTLINE_WRITER_MODEL, _MinWordCount=250
+        _Logger, Messages, writer.config.INITIAL_OUTLINE_WRITER_MODEL, _MinWordCount=250
     )
     Outline: str = Interface.GetLastMessageText(Messages)
     _Logger.Log(f"Done Generating Initial Outline", 4)
@@ -51,14 +51,14 @@ def GenerateOutline(Interface, _Logger, _OutlinePrompt, _QualityThreshold: int =
     Iterations: int = 0
     while True:
         Iterations += 1
-        Feedback = Writer.LLMEditor.GetFeedbackOnOutline(Interface, _Logger, Outline)
-        Rating = Writer.LLMEditor.GetOutlineRating(Interface, _Logger, Outline)
+        Feedback = writer.llm_editor.GetFeedbackOnOutline(Interface, _Logger, Outline)
+        Rating = writer.llm_editor.GetOutlineRating(Interface, _Logger, Outline)
         # Rating has been changed from a 0-100 int, to does it meet the standards (yes/no)?
         # Yes it has - the 0-100 int isn't actually good at all, LLM just returned a bunch of junk ratings
 
-        if Iterations > Writer.Config.OUTLINE_MAX_REVISIONS:
+        if Iterations > writer.config.OUTLINE_MAX_REVISIONS:
             break
-        if (Iterations > Writer.Config.OUTLINE_MIN_REVISIONS) and (Rating == True):
+        if (Iterations > writer.config.OUTLINE_MIN_REVISIONS) and (Rating == True):
             break
 
         Outline = ReviseOutline(Interface, _Logger, Outline, Feedback)
@@ -79,7 +79,7 @@ def GenerateOutline(Interface, _Logger, _OutlinePrompt, _QualityThreshold: int =
 
 def ReviseOutline(Interface, _Logger, _Outline, _Feedback, _History: list = []):
 
-    RevisionPrompt: str = Writer.Prompts.OUTLINE_REVISION_PROMPT.format(
+    RevisionPrompt: str = writer.prompts.OUTLINE_REVISION_PROMPT.format(
         _Outline=_Outline, _Feedback=_Feedback
     )
 
@@ -87,7 +87,7 @@ def ReviseOutline(Interface, _Logger, _Outline, _Feedback, _History: list = []):
     Messages = _History
     Messages.append(Interface.BuildUserQuery(RevisionPrompt))
     Messages = Interface.SafeGenerateText(
-        _Logger, Messages, Writer.Config.INITIAL_OUTLINE_WRITER_MODEL, _MinWordCount=250
+        _Logger, Messages, writer.config.INITIAL_OUTLINE_WRITER_MODEL, _MinWordCount=250
     )
     SummaryText: str = Interface.GetLastMessageText(Messages)
     _Logger.Log(f"Done Revising Outline", 2)
@@ -97,7 +97,7 @@ def ReviseOutline(Interface, _Logger, _Outline, _Feedback, _History: list = []):
 
 def GeneratePerChapterOutline(Interface, _Logger, _Chapter, _Outline:str, _History: list = []):
 
-    RevisionPrompt: str = Writer.Prompts.CHAPTER_OUTLINE_PROMPT.format(
+    RevisionPrompt: str = writer.prompts.CHAPTER_OUTLINE_PROMPT.format(
         _Chapter=_Chapter,
         _Outline=_Outline
     )
@@ -105,7 +105,7 @@ def GeneratePerChapterOutline(Interface, _Logger, _Chapter, _Outline:str, _Histo
     Messages = _History
     Messages.append(Interface.BuildUserQuery(RevisionPrompt))
     Messages = Interface.SafeGenerateText(
-        _Logger, Messages, Writer.Config.CHAPTER_OUTLINE_WRITER_MODEL, _MinWordCount=50
+        _Logger, Messages, writer.config.CHAPTER_OUTLINE_WRITER_MODEL, _MinWordCount=50
     )
     SummaryText: str = Interface.GetLastMessageText(Messages)
     _Logger.Log("Done Generating Outline For Chapter " + str(_Chapter), 5)

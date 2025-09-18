@@ -1,5 +1,5 @@
-import Writer.Config
-import Writer.Prompts
+import writer.config
+import writer.prompts
 
 import re
 import json
@@ -7,13 +7,13 @@ import json
 
 def LLMCountChapters(Interface, _Logger, _Summary):
 
-    Prompt = Writer.Prompts.CHAPTER_COUNT_PROMPT.format(_Summary=_Summary)
+    Prompt = writer.prompts.CHAPTER_COUNT_PROMPT.format(_Summary=_Summary)
 
     _Logger.Log("Prompting LLM To Get ChapterCount JSON", 5)
     Messages = []
     Messages.append(Interface.BuildUserQuery(Prompt))
     Messages = Interface.SafeGenerateText(
-        _Logger, Messages, Writer.Config.EVAL_MODEL, _Format="json"
+        _Logger, Messages, writer.config.EVAL_MODEL, _Format="json"
     )
     _Logger.Log("Finished Getting ChapterCount JSON", 5)
 
@@ -41,6 +41,6 @@ def LLMCountChapters(Interface, _Logger, _Summary):
             Messages.append(Interface.BuildUserQuery(EditPrompt))
             _Logger.Log("Asking LLM TO Revise", 7)
             Messages = Interface.SafeGenerateText(
-                _Logger, Messages, Writer.Config.EVAL_MODEL, _Format="json"
+                _Logger, Messages, writer.config.EVAL_MODEL, _Format="json"
             )
             _Logger.Log("Done Asking LLM TO Revise JSON", 6)

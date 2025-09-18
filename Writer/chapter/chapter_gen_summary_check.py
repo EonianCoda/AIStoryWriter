@@ -1,9 +1,9 @@
 import json
 
-import Writer.LLMEditor
-import Writer.PrintUtils
-import Writer.Config
-import Writer.Prompts
+import writer.llm_editor
+import writer.print_utils
+import writer.config
+import writer.prompts
 
 
 def LLMSummaryCheck(Interface, _Logger, _RefSummary: str, _Work: str):
@@ -22,47 +22,47 @@ def LLMSummaryCheck(Interface, _Logger, _RefSummary: str, _Work: str):
     # Build Summariziation Langchain
     SummaryLangchain: list = []
     SummaryLangchain.append(
-        Interface.BuildSystemQuery(Writer.Prompts.SUMMARY_CHECK_INTRO)
+        Interface.BuildSystemQuery(writer.prompts.SUMMARY_CHECK_INTRO)
     )
     SummaryLangchain.append(
         Interface.BuildUserQuery(
-            Writer.Prompts.SUMMARY_CHECK_PROMPT.format(_Work=_Work)
+            writer.prompts.SUMMARY_CHECK_PROMPT.format(_Work=_Work)
         )
     )
     SummaryLangchain = Interface.SafeGenerateText(
-        _Logger, SummaryLangchain, Writer.Config.CHAPTER_STAGE1_WRITER_MODEL
+        _Logger, SummaryLangchain, writer.config.CHAPTER_STAGE1_WRITER_MODEL
     )  # CHANGE THIS MODEL EVENTUALLY - BUT IT WORKS FOR NOW!!!
     WorkSummary: str = Interface.GetLastMessageText(SummaryLangchain)
 
     # Now Summarize The Outline
     SummaryLangchain: list = []
     SummaryLangchain.append(
-        Interface.BuildSystemQuery(Writer.Prompts.SUMMARY_OUTLINE_INTRO)
+        Interface.BuildSystemQuery(writer.prompts.SUMMARY_OUTLINE_INTRO)
     )
     SummaryLangchain.append(
         Interface.BuildUserQuery(
-            Writer.Prompts.SUMMARY_OUTLINE_PROMPT.format(_RefSummary=_RefSummary)
+            writer.prompts.SUMMARY_OUTLINE_PROMPT.format(_RefSummary=_RefSummary)
         )
     )
     SummaryLangchain = Interface.SafeGenerateText(
-        _Logger, SummaryLangchain, Writer.Config.CHAPTER_STAGE1_WRITER_MODEL
+        _Logger, SummaryLangchain, writer.config.CHAPTER_STAGE1_WRITER_MODEL
     )  # CHANGE THIS MODEL EVENTUALLY - BUT IT WORKS FOR NOW!!!
     OutlineSummary: str = Interface.GetLastMessageText(SummaryLangchain)
 
     # Now, generate a comparison JSON value.
     ComparisonLangchain: list = []
     ComparisonLangchain.append(
-        Interface.BuildSystemQuery(Writer.Prompts.SUMMARY_COMPARE_INTRO)
+        Interface.BuildSystemQuery(writer.prompts.SUMMARY_COMPARE_INTRO)
     )
     ComparisonLangchain.append(
         Interface.BuildUserQuery(
-            Writer.Prompts.SUMMARY_COMPARE_PROMPT.format(
+            writer.prompts.SUMMARY_COMPARE_PROMPT.format(
                 WorkSummary=WorkSummary, OutlineSummary=OutlineSummary
             )
         )
     )
     ComparisonLangchain = Interface.SafeGenerateText(
-        _Logger, ComparisonLangchain, Writer.Config.REVISION_MODEL, _Format="json"
+        _Logger, ComparisonLangchain, writer.config.REVISION_MODEL, _Format="json"
     )  # CHANGE THIS MODEL EVENTUALLY - BUT IT WORKS FOR NOW!!!
 
     Iters: int = 0
@@ -93,7 +93,7 @@ def LLMSummaryCheck(Interface, _Logger, _RefSummary: str, _Work: str):
             ComparisonLangchain = Interface.SafeGenerateText(
                 _Logger,
                 ComparisonLangchain,
-                Writer.Config.REVISION_MODEL,
+                writer.config.REVISION_MODEL,
                 _Format="json",
             )
             _Logger.Log("Done Asking LLM TO Revise JSON", 6)

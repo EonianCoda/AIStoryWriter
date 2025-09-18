@@ -1,4 +1,4 @@
-import Writer.Config
+import writer.config
 import dotenv
 import inspect
 import json
@@ -108,7 +108,7 @@ class Interface:
                         raise Exception(
                             "OPENROUTER_API_KEY not found in environment variables"
                         )
-                    from Writer.Interface.OpenRouter import OpenRouter
+                    from writer.Interface.OpenRouter import OpenRouter
 
                     self.Clients[Model] = OpenRouter(
                         api_key=os.environ["OPENROUTER_API_KEY"], model=ProviderModel
@@ -200,10 +200,10 @@ class Interface:
         )
 
         # Calculate Seed Information
-        Seed = Writer.Config.SEED if _SeedOverride == -1 else _SeedOverride
+        Seed = writer.config.SEED if _SeedOverride == -1 else _SeedOverride
 
         # Log message history if DEBUG is enabled
-        if Writer.Config.DEBUG:
+        if writer.config.DEBUG:
             print("--------- Message History START ---------")
             print("[")
             for Message in _Messages:
@@ -259,7 +259,7 @@ class Interface:
 
             # Set the default num_ctx if not set by args
             if "num_ctx" not in ModelOptions:
-                ModelOptions["num_ctx"] = Writer.Config.OLLAMA_CTX
+                ModelOptions["num_ctx"] = writer.config.OLLAMA_CTX
 
             _Logger.Log(f"Using Ollama Model Options: {ModelOptions}", 4)
 
@@ -429,7 +429,7 @@ class Interface:
             Response += ChunkText
             print(ChunkText, end="", flush=True)
 
-        print("\n\n\n" if Writer.Config.DEBUG else "")
+        print("\n\n\n" if writer.config.DEBUG else "")
         return {"role": "assistant", "content": Response}
 
     def BuildUserQuery(self, _Query: str):
