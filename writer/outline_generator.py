@@ -2,9 +2,21 @@
 
 from typing import Any, Tuple, List
 from writer.interface.wrapper import Interface
-import writer.llm_editor
-import writer.config
-import writer.prompts
+from writer.llm_editor import get_feedback_on_outline, get_outline_rating
+from writer.config import (
+    INITIAL_OUTLINE_WRITER_MODEL,
+    OUTLINE_MAX_REVISIONS,
+    OUTLINE_MIN_REVISIONS,
+    CHAPTER_OUTLINE_WRITER_MODEL,
+)
+from writer.prompts import (
+    GET_IMPORTANT_BASE_PROMPT_INFO,
+    INITIAL_OUTLINE_PROMPT,
+    OUTLINE_REVISION_PROMPT,
+    CHAPTER_OUTLINE_PROMPT,
+)
+from writer.outline.story_elements import generate_story_elements
+
 
 def generate_outline(
     interface: Interface,
@@ -14,25 +26,24 @@ def generate_outline(
 ) -> Tuple[str, Any, Any, Any]:
     """Generate the story outline."""
 
-    prompt_info: str = writer.prompts.GET_IMPORTANT_BASE_PROMPT_INFO.format(
+    prompt_info: str = GET_IMPORTANT_BASE_PROMPT_INFO.format(
         _Prompt=prompt
     )
 
     logger.log("Extracting Important Base Context", 4)
     messages = [interface.build_user_query(prompt_info)]
     messages = interface.safe_generate_text(
-        logger, messages, writer.config.INITIAL_OUTLINE_WRITER_MODEL
+        logger, messages, INITIAL_OUTLINE_WRITER_MODEL
     )
     base_context: str = interface.get_last_message_text(messages)
     logger.log("Done Extracting Important Base Context", 4)
 
-
-    story_elements: str = writer.outline.story_elements.GenerateStoryElements(
+    story_elements: str = generate_story_elements(
         interface, logger, prompt
     )
 
 
-    outline_prompt: str = writer.prompts.INITIAL_OUTLINE_PROMPT.format(
+    outline_prompt: str = INITIAL_OUTLINE_PROMPT.format(
         StoryElements=story_elements, _OutlinePrompt=prompt
     )
 
@@ -40,7 +51,7 @@ def generate_outline(
     logger.log("Generating Initial Outline", 4)
     messages = [interface.build_user_query(outline_prompt)]
     messages = interface.safe_generate_text(
-        logger, messages, writer.config.INITIAL_OUTLINE_WRITER_MODEL, min_word_count=250
+        logger, messages, INITIAL_OUTLINE_WRITER_MODEL, min_word_count=250
     )
     outline: str = interface.get_last_message_text(messages)
     logger.log("Done Generating Initial Outline", 4)
@@ -51,14 +62,14 @@ def generate_outline(
     iterations: int = 0
     while True:
         iterations += 1
-        feedback = writer.llm_editor.GetFeedbackOnOutline(interface, logger, outline)
-        rating = writer.llm_editor.GetOutlineRating(interface, logger, outline)
+        feedback = get_feedback_on_outline(interface, logger, outline)
+        rating = get_outline_rating(interface, logger, outline)
         # Rating has been changed from a 0-100 int, to does it meet the standards (yes/no)?
         # Yes it has - the 0-100 int isn't actually good at all, LLM just returned a bunch of junk ratings
 
-        if iterations > writer.config.OUTLINE_MAX_REVISIONS:
+        if iterations > OUTLINE_MAX_REVISIONS:
             break
-        if (iterations > writer.config.OUTLINE_MIN_REVISIONS) and (rating is True):
+        if (iterations > OUTLINE_MIN_REVISIONS) and (rating is True):
             break
 
         outline, writing_history = revise_outline(interface, logger, outline, feedback, writing_history)
@@ -77,7 +88,7 @@ def generate_outline(
 
 
 def revise_outline(interface: Interface, logger: Any, outline, feedback, history: list = []):
-    revision_prompt: str = writer.prompts.OUTLINE_REVISION_PROMPT.format(
+    revision_prompt: str = OUTLINE_REVISION_PROMPT.format(
         _Outline=outline, _Feedback=feedback
     )
 
@@ -85,7 +96,7 @@ def revise_outline(interface: Interface, logger: Any, outline, feedback, history
     messages = history
     messages.append(interface.build_user_query(revision_prompt))
     messages = interface.safe_generate_text(
-        logger, messages, writer.config.INITIAL_OUTLINE_WRITER_MODEL, min_word_count=250
+        logger, messages, INITIAL_OUTLINE_WRITER_MODEL, min_word_count=250
     )
     summary_text: str = interface.get_last_message_text(messages)
     logger.log("Done Revising Outline", 2)
@@ -102,7 +113,7 @@ def generate_per_chapter_outline(
 ) -> Tuple[str, List[Any]]:
     """Generate per-chapter outline."""
 
-    revision_prompt: str = writer.prompts.CHAPTER_OUTLINE_PROMPT.format(
+    revision_prompt: str = CHAPTER_OUTLINE_PROMPT.format(
         _Chapter=chapter,
         _Outline=outline
     )
@@ -110,7 +121,7 @@ def generate_per_chapter_outline(
     messages_list = messages
     messages_list.append(interface.build_user_query(revision_prompt))
     messages_list = interface.safe_generate_text(
-        logger, messages_list, writer.config.CHAPTER_OUTLINE_WRITER_MODEL, min_word_count=50
+        logger, messages_list, CHAPTER_OUTLINE_WRITER_MODEL, min_word_count=50
     )
     summary_text: str = interface.get_last_message_text(messages_list)
     logger.log("Done Generating Outline For Chapter " + str(chapter), 5)

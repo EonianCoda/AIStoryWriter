@@ -4,7 +4,7 @@ import writer.config
 from writer.interface.wrapper import Interface
 
 
-def gen_story_elements(interface: Interface, logger, outline_prompt):
+def generate_story_elements(interface: Interface, logger, outline_prompt):
 
     prompt: str = f"""
 I'm working on writing a fictional story, and I'd like your help writing out the story elements.

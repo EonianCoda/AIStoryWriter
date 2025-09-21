@@ -16,7 +16,6 @@ from writer.prompts import (
     CHAPTER_COMPLETE_PROMPT,
 )
 from writer.config import REVISION_MODEL, EVAL_MODEL
-import writer.prompts
 
 def get_feedback_on_outline(interface: Interface, logger: Logger, outline: str) -> str:
     """Prompt LLM to critique outline."""
@@ -118,6 +117,7 @@ def get_chapter_rating(interface: Interface, logger: Logger, chapter: str) -> bo
                 logger, history, EVAL_MODEL
             )
             logger.log("Done Asking LLM TO Revise JSON", 6)
+            logger.log("Done Asking LLM TO Revise JSON", 6)
         RawResponse = RawResponse.replace("json", "")
 
         try:
@@ -131,10 +131,10 @@ def get_chapter_rating(interface: Interface, logger: Logger, chapter: str) -> bo
                 return False
 
             logger.log("Error Parsing JSON Written By LLM, Asking For Edits", 7)
-            EditPrompt: str = writer.prompts.JSON_PARSE_ERROR.format(_Error=E)
+            EditPrompt: str = JSON_PARSE_ERROR.format(_Error=E)
             History.append(interface.build_user_query(EditPrompt))
             logger.log("Asking LLM TO Revise", 7)
             History = interface.safe_generate_text(
-                logger, History, writer.config.EVAL_MODEL
+                logger, History, EVAL_MODEL
             )
             logger.log("Done Asking LLM TO Revise JSON", 6)

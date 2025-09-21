@@ -17,6 +17,8 @@ INFO_MODEL = "ollama://qwen3:4b"  # Note this value is overridden by the argpars
 SCRUB_MODEL = "ollama://qwen3:4b"  # Note this value is overridden by the argparser
 CHECKER_MODEL = "ollama://qwen3:4b"  # Model used to check results
 TRANSLATOR_MODEL = "ollama://qwen3:4b"
+CHAPTER_WRITER_MODEL = "ollama://qwen3:4b"
+
 
 OLLAMA_CTX = 8192
 

@@ -2,20 +2,20 @@
 
 from typing import Any, List, Dict
 from writer.interface.wrapper import Interface
-import writer.config
+from writer.config import INFO_MODEL
 import json
-import writer.prompts
+from writer.prompts import STATS_PROMPT
 
 def get_story_info(interface: Interface, logger: Any, messages: List[Any]) -> Dict[str, Any]:
     """Get story info such as title, summary, tags."""
 
-    prompt: str = writer.prompts.STATS_PROMPT
+    prompt: str = STATS_PROMPT
 
     logger.log("Prompting LLM To Generate Stats", 5)
     messages_list = messages
     messages_list.append(interface.build_user_query(prompt))
     messages_list = interface.safe_generate_text(
-        logger, messages_list, writer.config.INFO_MODEL, format="json"
+        logger, messages_list, INFO_MODEL, format="json"
     )
     logger.log("Finished Getting Stats Feedback", 5)
 
@@ -41,6 +41,7 @@ def get_story_info(interface: Interface, logger: Any, messages: List[Any]) -> Di
             messages_list.append(interface.build_user_query(edit_prompt))
             logger.log("Asking LLM TO Revise", 7)
             messages_list = interface.safe_generate_text(
-                logger, messages_list, writer.config.INFO_MODEL, format="json"
+                logger, messages_list, INFO_MODEL, format="json"
             )
+            logger.log("Done Asking LLM TO Revise JSON", 6)
             logger.log("Done Asking LLM TO Revise JSON", 6)

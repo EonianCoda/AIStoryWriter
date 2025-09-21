@@ -45,7 +45,7 @@ def llm_summary_check(interface: Interface, logger: Logger, ref_summary: str, wo
     )
     summary_langchain = interface.safe_generate_text(
         logger, summary_langchain, CHAPTER_STAGE1_WRITER_MODEL
-    )  # CHANGE THIS MODEL EVENTUALLY - BUT IT WORKS FOR NOW!!!
+    )
     work_summary = interface.get_last_message_text(summary_langchain)
 
     # Now Summarize The Outline
@@ -60,7 +60,7 @@ def llm_summary_check(interface: Interface, logger: Logger, ref_summary: str, wo
     )
     summary_langchain = interface.safe_generate_text(
         logger, summary_langchain, CHAPTER_STAGE1_WRITER_MODEL
-    )  # CHANGE THIS MODEL EVENTUALLY - BUT IT WORKS FOR NOW!!!
+    )
     outline_summary = interface.get_last_message_text(summary_langchain)
 
     # Now, generate a comparison JSON value.
@@ -77,7 +77,7 @@ def llm_summary_check(interface: Interface, logger: Logger, ref_summary: str, wo
     )
     comparison_langchain = interface.safe_generate_text(
         logger, comparison_langchain, REVISION_MODEL, format="json"
-    )  # CHANGE THIS MODEL EVENTUALLY - BUT IT WORKS FOR NOW!!!
+    )
 
     iters = 0
     while True:

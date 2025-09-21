@@ -14,7 +14,7 @@ def chapter_by_scene(interface: Interface, logger, this_chapter: str, outline: s
     logger.log(f"Starting Scene-By-Scene Chapter Generation Pipeline", 2)
 
     scene_by_scene_outline = writer.scene.chapter_outline_to_scenes.chapter_outline_to_scenes(
-        interface, logger, this_chapter, outline, _BaseContext=base_context
+        interface, logger, this_chapter, outline, base_context=base_context
     )
 
     scene_json_list = writer.scene.scenes_to_json.scenes_to_json(interface, logger, scene_by_scene_outline)

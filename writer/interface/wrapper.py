@@ -383,7 +383,7 @@ class Interface:
         for frame in inspect.stack()[1:]:
             call_stack += f"{frame.function}."
         call_stack = call_stack[:-1].replace("<module>", "Main")
-        logger.SaveLangchain(call_stack, messages)
+        logger.save_lang_chain(call_stack, messages)
         return messages
 
     def stream_response(self, stream, provider: str):

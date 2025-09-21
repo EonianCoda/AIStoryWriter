@@ -2,10 +2,9 @@
 
 from typing import Any, List
 from writer.interface.wrapper import Interface
-
-import writer.config
-import writer.prompts
-import writer.statistics
+from writer.config import TRANSLATOR_MODEL
+from writer.prompts import TRANSLATE_PROMPT, CHAPTER_TRANSLATE_PROMPT
+from writer.statistics import get_word_count
 
 
 def translate_prompt(
@@ -16,14 +15,14 @@ def translate_prompt(
 ) -> str:
     """Translate the input prompt to the specified language."""
 
-    formatted_prompt: str = writer.prompts.TRANSLATE_PROMPT.format(
+    formatted_prompt: str = TRANSLATE_PROMPT.format(
         _Prompt=prompt, _Language=language
     )
     logger.log("Prompting LLM To Translate User Prompt", 5)
     messages = []
     messages.append(interface.build_user_query(formatted_prompt))
     messages = interface.safe_generate_text(
-        logger, messages, writer.config.TRANSLATOR_MODEL, min_word_count=50
+        logger, messages, TRANSLATOR_MODEL, min_word_count=50
     )
     logger.log("Finished Prompt Translation", 5)
 
@@ -43,20 +42,21 @@ def translate_novel(
 
     for chapter_index in range(num_chapters):
 
-        formatted_prompt: str = writer.prompts.CHAPTER_TRANSLATE_PROMPT.format(
+        formatted_prompt: str = CHAPTER_TRANSLATE_PROMPT.format(
             _Chapter=edited_chapters[chapter_index], _Language=language
         )
         logger.log(f"Prompting LLM To Perform Chapter {chapter_index+1} Translation", 5)
         messages = []
         messages.append(interface.build_user_query(formatted_prompt))
         messages = interface.safe_generate_text(
-            logger, messages, writer.config.TRANSLATOR_MODEL
+            logger, messages, TRANSLATOR_MODEL
         )
         logger.log(f"Finished Chapter {chapter_index+1} Translation", 5)
 
         new_chapter = interface.get_last_message_text(messages)
         edited_chapters[chapter_index] = new_chapter
-        chapter_word_count = writer.statistics.get_word_count(new_chapter)
+        chapter_word_count = get_word_count(new_chapter)
         logger.log(f"Translation Chapter Word Count: {chapter_word_count}", 3)
 
+    return edited_chapters
     return edited_chapters

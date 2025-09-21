@@ -2,9 +2,9 @@
 
 from typing import Any, List
 from writer.interface.wrapper import Interface
-import writer.print_utils
-import writer.config
-import writer.prompts
+from writer.print_utils import Logger
+from writer.config import CHAPTER_WRITER_MODEL
+from writer.prompts import CHAPTER_EDIT_PROMPT
 from writer.statistics import get_word_count
 
 def edit_novel(
@@ -23,7 +23,7 @@ def edit_novel(
         for chapter in edited_chapters:
             novel_text += chapter
 
-        prompt: str = writer.prompts.CHAPTER_EDIT_PROMPT.format(
+        prompt: str = CHAPTER_EDIT_PROMPT.format(
             _Chapter=edited_chapters[chapter_index], NovelText=novel_text, i=chapter_index
         )
 
@@ -33,7 +33,7 @@ def edit_novel(
         messages = []
         messages.append(interface.build_user_query(prompt))
         messages = interface.safe_generate_text(
-            logger, messages, writer.config.CHAPTER_WRITER_MODEL
+            logger, messages, CHAPTER_WRITER_MODEL
         )
         logger.log(f"Finished Chapter {chapter_index} Second Pass In-Place Edit", 5)
 

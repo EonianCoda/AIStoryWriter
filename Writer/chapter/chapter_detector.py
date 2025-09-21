@@ -2,21 +2,21 @@
 
 from typing import Any
 
-import writer.config
-import writer.prompts
+from writer.config import EVAL_MODEL
+from writer.prompts import CHAPTER_COUNT_PROMPT
 import json
 from writer.interface.wrapper import Interface
 
 def llm_count_chapters(interface: Interface, logger: Any, message_text: str) -> int:
     """Count chapters using LLM."""
 
-    prompt = writer.prompts.CHAPTER_COUNT_PROMPT.format(_Summary=message_text)
+    prompt = CHAPTER_COUNT_PROMPT.format(_Summary=message_text)
 
     logger.log("Prompting LLM To Get ChapterCount JSON", 5)
     messages = []
     messages.append(interface.build_user_query(prompt))
     messages = interface.safe_generate_text(
-        logger, messages, writer.config.EVAL_MODEL, _Format="json"
+        logger, messages, EVAL_MODEL, format="json"
     )
     logger.log("Finished Getting ChapterCount JSON", 5)
 
@@ -44,6 +44,6 @@ def llm_count_chapters(interface: Interface, logger: Any, message_text: str) -> 
             messages.append(interface.build_user_query(edit_prompt))
             logger.log("Asking LLM TO Revise", 7)
             messages = interface.safe_generate_text(
-                logger, messages, writer.config.EVAL_MODEL, _Format="json"
+                logger, messages, EVAL_MODEL, _Format="json"
             )
             logger.log("Done Asking LLM TO Revise JSON", 6)

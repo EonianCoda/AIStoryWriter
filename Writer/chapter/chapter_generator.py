@@ -2,14 +2,31 @@
 
 from typing import Any, List
 from writer.interface.wrapper import Interface
-
-import writer.llm_editor
-import writer.print_utils
-import writer.config
-import writer.chapter.chapter_gen_summary_check
-import writer.prompts
-
-import writer.scene.chapter_by_scene
+from writer.config import (
+    CHAPTER_STAGE1_WRITER_MODEL,
+    CHAPTER_STAGE2_WRITER_MODEL,
+    CHAPTER_STAGE3_WRITER_MODEL,
+    CHAPTER_STAGE4_WRITER_MODEL,
+    CHAPTER_REVISION_WRITER_MODEL,
+    CHAPTER_MAX_REVISIONS,
+    CHAPTER_MIN_REVISIONS,
+    CHAPTER_NO_REVISIONS,
+    SCENE_GENERATION_PIPELINE,
+    SEED,
+)
+from writer.prompts import (
+    CHAPTER_GENERATION_INTRO,
+    CHAPTER_HISTORY_INSERT,
+    CHAPTER_GENERATION_PROMPT,
+    CHAPTER_SUMMARY_INTRO,
+    CHAPTER_SUMMARY_PROMPT,
+    CHAPTER_GENERATION_STAGE1,
+    CHAPTER_GENERATION_STAGE2,
+    CHAPTER_GENERATION_STAGE3,
+    CHAPTER_REVISION,
+)
+from writer.chapter.chapter_gen_summary_check import llm_summary_check
+from writer.scene.chapter_by_scene import chapter_by_scene
 
 def generate_chapter(
     interface: Interface,
@@ -31,7 +48,7 @@ def generate_chapter(
     message_history: list = []
     message_history.append(
         interface.build_system_query(
-            writer.prompts.CHAPTER_GENERATION_INTRO.format(
+            CHAPTER_GENERATION_INTRO.format(
                 _ChapterNum=chapter_index, _TotalChapters=total_chapters
             )
         )
@@ -45,7 +62,7 @@ def generate_chapter(
         for chapter in chapters:
             chapter_superlist += f"{chapter}\n"
 
-        context_history_insert += writer.prompts.CHAPTER_HISTORY_INSERT.format(
+        context_history_insert += CHAPTER_HISTORY_INSERT.format(
             _Outline=outline, ChapterSuperlist=chapter_superlist
         )
 
@@ -61,11 +78,11 @@ def generate_chapter(
     this_chapter_outline: str = ""
     chapter_segment_messages = []
     chapter_segment_messages.append(
-        interface.build_system_query(writer.prompts.CHAPTER_GENERATION_INTRO)
+        interface.build_system_query(CHAPTER_GENERATION_INTRO)
     )
     chapter_segment_messages.append(
         interface.build_user_query(
-            writer.prompts.CHAPTER_GENERATION_PROMPT.format(
+            CHAPTER_GENERATION_PROMPT.format(
                 _Outline=outline, _ChapterNum=chapter_index
             )
         )
@@ -73,7 +90,7 @@ def generate_chapter(
     chapter_segment_messages = interface.safe_generate_text(
         logger,
         chapter_segment_messages,
-        writer.config.CHAPTER_STAGE1_WRITER_MODEL, min_word_count=120
+        CHAPTER_STAGE1_WRITER_MODEL, min_word_count=120
     )  # CHANGE THIS MODEL EVENTUALLY - BUT IT WORKS FOR NOW!!!
     this_chapter_outline: str = interface.get_last_message_text(chapter_segment_messages)
     logger.log(f"Created Chapter Specific Outline", 4)
@@ -84,11 +101,11 @@ def generate_chapter(
         logger.log(f"Creating Summary Of Last Chapter Info", 3)
         chapter_summary_messages = []
         chapter_summary_messages.append(
-            interface.build_system_query(writer.prompts.CHAPTER_SUMMARY_INTRO)
+            interface.build_system_query(CHAPTER_SUMMARY_INTRO)
         )
         chapter_summary_messages.append(
             interface.build_user_query(
-                writer.prompts.CHAPTER_SUMMARY_PROMPT.format(
+                CHAPTER_SUMMARY_PROMPT.format(
                     _ChapterNum=chapter_index,
                     _TotalChapters=total_chapters,
                     _Outline=outline,
@@ -99,7 +116,7 @@ def generate_chapter(
         chapter_summary_messages = interface.safe_generate_text(
             logger,
             chapter_summary_messages,
-            writer.config.CHAPTER_STAGE1_WRITER_MODEL, min_word_count=100
+            CHAPTER_STAGE1_WRITER_MODEL, min_word_count=100
         )  # CHANGE THIS MODEL EVENTUALLY - BUT IT WORKS FOR NOW!!!
         formatted_last_chapter_summary: str = interface.get_last_message_text(
             chapter_summary_messages
@@ -115,13 +132,13 @@ def generate_chapter(
 
     # If scene generation disabled, use the normal initial plot generator
     stage1_chapter = ""
-    if not writer.config.SCENE_GENERATION_PIPELINE:
+    if not SCENE_GENERATION_PIPELINE:
 
         #### STAGE 1: Create Initial Plot
         iter_counter: int = 0
         feedback: str = ""
         while True:
-            prompt = writer.prompts.CHAPTER_GENERATION_STAGE1.format(
+            prompt = CHAPTER_GENERATION_STAGE1.format(
                 ContextHistoryInsert=context_history_insert,
                 _ChapterNum=chapter_index,
                 _TotalChapters=total_chapters,
@@ -142,8 +159,8 @@ def generate_chapter(
             messages = interface.safe_generate_text(
                 logger,
                 messages,
-                writer.config.CHAPTER_STAGE1_WRITER_MODEL,
-                seed_override=iter_counter + writer.config.SEED,
+                CHAPTER_STAGE1_WRITER_MODEL,
+                seed_override=iter_counter + SEED,
                 min_word_count=100
             )
             iter_counter += 1
@@ -154,12 +171,12 @@ def generate_chapter(
             )
 
             # Check if LLM did the work
-            if iter_counter > writer.config.CHAPTER_MAX_REVISIONS:
+            if iter_counter > CHAPTER_MAX_REVISIONS:
                 logger.log(
                     "Chapter Summary-Based Revision Seems Stuck - Forcefully Exiting", 7
                 )
                 break
-            result, feedback = writer.chapter.chapter_gen_summary_check.llm_summary_check(
+            result, feedback = llm_summary_check(
                 interface, logger, detailed_chapter_outline, stage1_chapter
             )
             if result:
@@ -171,7 +188,7 @@ def generate_chapter(
     
     else:
 
-        stage1_chapter = writer.scene.chapter_by_scene.ChapterByScene(interface, logger, this_chapter_outline, outline, base_context)
+        stage1_chapter = chapter_by_scene(interface, logger, this_chapter_outline, outline, base_context)
 
 
     #### STAGE 2: Add Character Development
@@ -179,7 +196,7 @@ def generate_chapter(
     iter_counter: int = 0
     feedback: str = ""
     while True:
-        prompt = writer.prompts.CHAPTER_GENERATION_STAGE2.format(
+        prompt = CHAPTER_GENERATION_STAGE2.format(
             ContextHistoryInsert=context_history_insert,
             _ChapterNum=chapter_index,
             _TotalChapters=total_chapters,
@@ -201,8 +218,8 @@ def generate_chapter(
         messages = interface.safe_generate_text(
             logger,
             messages,
-            writer.config.CHAPTER_STAGE2_WRITER_MODEL,
-            seed_override=iter_counter + writer.config.SEED,
+            CHAPTER_STAGE2_WRITER_MODEL,
+            seed_override=iter_counter + SEED,
             min_word_count=100
         )
         iter_counter += 1
@@ -213,12 +230,12 @@ def generate_chapter(
         )
 
         # Check if LLM did the work
-        if iter_counter > writer.config.CHAPTER_MAX_REVISIONS:
+        if iter_counter > CHAPTER_MAX_REVISIONS:
             logger.log(
                 "Chapter Summary-Based Revision Seems Stuck - Forcefully Exiting", 7
             )
             break
-        result, feedback = writer.chapter.chapter_gen_summary_check.llm_summary_check(
+        result, feedback = llm_summary_check(
             interface, logger, detailed_chapter_outline, stage2_chapter
         )
         if result:
@@ -233,7 +250,7 @@ def generate_chapter(
     iter_counter: int = 0
     feedback: str = ""
     while True:
-        prompt = writer.prompts.CHAPTER_GENERATION_STAGE3.format(
+        prompt = CHAPTER_GENERATION_STAGE3.format(
             ContextHistoryInsert=context_history_insert,
             _ChapterNum=chapter_index,
             _TotalChapters=total_chapters,
@@ -254,8 +271,8 @@ def generate_chapter(
         messages = interface.safe_generate_text(
             logger,
             messages,
-            writer.config.CHAPTER_STAGE3_WRITER_MODEL,
-            seed_override=iter_counter + writer.config.SEED,
+            CHAPTER_STAGE3_WRITER_MODEL,
+            seed_override=iter_counter + SEED,
             min_word_count=100
         )
         iter_counter += 1
@@ -266,12 +283,12 @@ def generate_chapter(
         )
 
         # Check if LLM did the work
-        if iter_counter > writer.config.CHAPTER_MAX_REVISIONS:
+        if iter_counter > CHAPTER_MAX_REVISIONS:
             logger.log(
                 "Chapter Summary-Based Revision Seems Stuck - Forcefully Exiting", 7
             )
             break
-        result, feedback = writer.chapter.chapter_gen_summary_check.llm_summary_check(
+        result, feedback = llm_summary_check(
             interface, logger, detailed_chapter_outline, stage3_chapter
         )
         if result:
@@ -302,7 +319,7 @@ def generate_chapter(
     chapter: str = stage3_chapter
 
     #### Stage 5: Revision Cycle
-    if writer.config.CHAPTER_NO_REVISIONS:
+    if CHAPTER_NO_REVISIONS:
         logger.log(f"Chapter Revision Disabled In Config, Exiting Now", 5)
         return chapter
 
@@ -320,9 +337,9 @@ def generate_chapter(
         )
         rating = writer.llm_editor.get_chapter_rating(interface, logger, chapter)
 
-        if iterations > writer.config.CHAPTER_MAX_REVISIONS:
+        if iterations > CHAPTER_MAX_REVISIONS:
             break
-        if (iterations > writer.config.CHAPTER_MIN_REVISIONS) and (rating is True):
+        if (iterations > CHAPTER_MIN_REVISIONS) and (rating is True):
             break
         chapter, writing_history = revise_chapter(
             interface, logger, chapter, feedback, writing_history
@@ -337,7 +354,7 @@ def generate_chapter(
 
 
 def revise_chapter(interface: Interface, logger: Any, chapter, feedback, history: list = []):
-    revision_prompt = writer.prompts.CHAPTER_REVISION.format(
+    revision_prompt = CHAPTER_REVISION.format(
         _Chapter=chapter, _Feedback=feedback
     )
 
@@ -345,7 +362,7 @@ def revise_chapter(interface: Interface, logger: Any, chapter, feedback, history
     messages = history
     messages.append(interface.build_user_query(revision_prompt))
     messages = interface.safe_generate_text(
-        logger, messages, writer.config.CHAPTER_REVISION_WRITER_MODEL,
+        logger, messages, CHAPTER_REVISION_WRITER_MODEL,
         min_word_count=100
     )
     summary_text: str = interface.get_last_message_text(messages)
