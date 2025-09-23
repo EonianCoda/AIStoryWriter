@@ -1,5 +1,5 @@
 import writer.llm_editor
-import writer.print_utils
+import writer.logger
 import writer.config
 import writer.chapter.chapter_gen_summary_check
 import writer.prompts
@@ -13,7 +13,7 @@ def scene_outline_to_scene(interface: Interface, logger, scene_outline: str, out
     message_history.append(interface.build_system_query(writer.prompts.DEFAULT_SYSTEM_PROMPT))
     message_history.append(interface.build_user_query(writer.prompts.SCENE_OUTLINE_TO_SCENE.format(_SceneOutline=scene_outline, _Outline=outline)))
 
-    response = interface.safe_generate_text(logger, message_history, writer.config.CHAPTER_STAGE1_WRITER_MODEL, min_word_count=100)
+    response = interface.generate_text(logger, message_history, writer.config.CHAPTER_STAGE1_WRITER_MODEL, min_word_count=100)
     logger.log("Finished SceneOutline->Scene", 5)
 
     return interface.get_last_message_text(response)

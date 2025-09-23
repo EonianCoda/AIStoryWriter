@@ -2,13 +2,7 @@
 
 import json
 from writer.interface.wrapper import Interface
-from writer.llm_editor import (
-    get_feedback_on_chapter,
-    get_feedback_on_outline,
-    get_chapter_rating,
-    get_outline_rating,
-)
-from writer.print_utils import Logger
+from writer.logger import Logger
 from writer.config import CHAPTER_STAGE1_WRITER_MODEL, REVISION_MODEL
 from writer.prompts import (
     SUMMARY_CHECK_INTRO,
@@ -43,7 +37,7 @@ def llm_summary_check(interface: Interface, logger: Logger, ref_summary: str, wo
             SUMMARY_CHECK_PROMPT.format(_Work=work)
         )
     )
-    summary_langchain = interface.safe_generate_text(
+    summary_langchain = interface.generate_text(
         logger, summary_langchain, CHAPTER_STAGE1_WRITER_MODEL
     )
     work_summary = interface.get_last_message_text(summary_langchain)
@@ -58,7 +52,7 @@ def llm_summary_check(interface: Interface, logger: Logger, ref_summary: str, wo
             SUMMARY_OUTLINE_PROMPT.format(_RefSummary=ref_summary)
         )
     )
-    summary_langchain = interface.safe_generate_text(
+    summary_langchain = interface.generate_text(
         logger, summary_langchain, CHAPTER_STAGE1_WRITER_MODEL
     )
     outline_summary = interface.get_last_message_text(summary_langchain)
@@ -75,7 +69,7 @@ def llm_summary_check(interface: Interface, logger: Logger, ref_summary: str, wo
             )
         )
     )
-    comparison_langchain = interface.safe_generate_text(
+    comparison_langchain = interface.generate_text(
         logger, comparison_langchain, REVISION_MODEL, format="json"
     )
 
@@ -103,7 +97,7 @@ def llm_summary_check(interface: Interface, logger: Logger, ref_summary: str, wo
             )
             comparison_langchain.append(interface.build_user_query(edit_prompt))
             logger.log("Asking LLM TO Revise", 7)
-            comparison_langchain = interface.safe_generate_text(
+            comparison_langchain = interface.generate_text(
                 logger,
                 comparison_langchain,
                 REVISION_MODEL,

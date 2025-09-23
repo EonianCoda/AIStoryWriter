@@ -2,7 +2,7 @@
 
 from typing import Any, List
 from writer.interface.wrapper import Interface
-from writer.print_utils import Logger
+from writer.logger import Logger
 from writer.config import CHAPTER_WRITER_MODEL
 from writer.prompts import CHAPTER_EDIT_PROMPT
 from writer.statistics import get_word_count
@@ -32,7 +32,7 @@ def edit_novel(
         )
         messages = []
         messages.append(interface.build_user_query(prompt))
-        messages = interface.safe_generate_text(
+        messages = interface.generate_text(
             logger, messages, CHAPTER_WRITER_MODEL
         )
         logger.log(f"Finished Chapter {chapter_index} Second Pass In-Place Edit", 5)

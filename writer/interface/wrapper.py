@@ -117,25 +117,21 @@ class Interface:
                     print(f"Warning, ")
                     raise Exception(f"Model Provider {provider} for {model} not found")
 
-    def safe_generate_text(
+    def generate_text(
         self,
         logger,
         messages,
-        model: str,
+        model_name: str,
         seed_override: int = -1,
         format: str = None,
         min_word_count: int = 1
         ):
-        """
-        保證輸出不為空白。
-        """
-
         # 移除空訊息
         for i in range(len(messages) - 1, 0, -1):
             if messages[i]["content"].strip() == "":
                 del messages[i]
 
-        new_msg = self.chat_and_stream_response(logger, messages, model, seed_override, format)
+        new_msg = self.chat_and_stream_response(logger, messages, model_name, seed_override, format)
 
         while (self.get_last_message_text(new_msg).strip() == "") or (len(self.get_last_message_text(new_msg).split(" ")) < min_word_count):
             if self.get_last_message_text(new_msg).strip() == "":
@@ -144,7 +140,7 @@ class Interface:
                 logger.log(f"SafeGenerateText: Generation Failed Due To Short Response ({len(self.get_last_message_text(new_msg).split(' '))}, min is {min_word_count}), Reattempting Output", 7)
 
             del messages[-1] # 移除失敗嘗試
-            new_msg = self.chat_and_stream_response(logger, messages, model, random.randint(0, 99999), format)
+            new_msg = self.chat_and_stream_response(logger, messages, model_name, random.randint(0, 99999), format)
 
         self.remove_think_tag_from_assistant_messages(new_msg)
 
@@ -159,7 +155,7 @@ class Interface:
     def safe_generate_json(self, logger, messages, model: str, seed_override: int = -1, required_attribs: list = []):
         """安全產生 JSON 格式回應，並檢查必要屬性。"""
         while True:
-            response = self.safe_generate_text(logger, messages, model, seed_override, format="JSON")
+            response = self.generate_text(logger, messages, model, seed_override, format="JSON")
             try:
                 last_message = self.get_last_message_text(response)
                 last_message = re.sub(r'^```json\s*', '', last_message)
@@ -379,10 +375,10 @@ class Interface:
             )
             return self.chat_and_stream_response(logger, messages, model, seed_override)
 
-        call_stack: str = ""
-        for frame in inspect.stack()[1:]:
-            call_stack += f"{frame.function}."
-        call_stack = call_stack[:-1].replace("<module>", "Main")
+        call_stack = ".".join([frame.function for frame in inspect.stack()[1:]])
+        call_stack = call_stack.replace(".<module>", "")
+        call_stack = call_stack.replace("generate_text.", "")
+        call_stack = call_stack.replace(".main", "")
         logger.save_lang_chain(call_stack, messages)
         return messages
 

@@ -87,7 +87,7 @@ def generate_chapter(
             )
         )
     )
-    chapter_segment_messages = interface.safe_generate_text(
+    chapter_segment_messages = interface.generate_text(
         logger,
         chapter_segment_messages,
         CHAPTER_STAGE1_WRITER_MODEL, min_word_count=120
@@ -113,7 +113,7 @@ def generate_chapter(
                 )
             )
         )
-        chapter_summary_messages = interface.safe_generate_text(
+        chapter_summary_messages = interface.generate_text(
             logger,
             chapter_summary_messages,
             CHAPTER_STAGE1_WRITER_MODEL, min_word_count=100
@@ -156,7 +156,7 @@ def generate_chapter(
             messages = message_history.copy()
             messages.append(interface.build_user_query(prompt))
 
-            messages = interface.safe_generate_text(
+            messages = interface.generate_text(
                 logger,
                 messages,
                 CHAPTER_STAGE1_WRITER_MODEL,
@@ -215,7 +215,7 @@ def generate_chapter(
         messages = message_history.copy()
         messages.append(interface.build_user_query(prompt))
 
-        messages = interface.safe_generate_text(
+        messages = interface.generate_text(
             logger,
             messages,
             CHAPTER_STAGE2_WRITER_MODEL,
@@ -268,7 +268,7 @@ def generate_chapter(
         messages = message_history.copy()
         messages.append(interface.build_user_query(prompt))
 
-        messages = interface.safe_generate_text(
+        messages = interface.generate_text(
             logger,
             messages,
             CHAPTER_STAGE3_WRITER_MODEL,
@@ -361,7 +361,7 @@ def revise_chapter(interface: Interface, logger: Any, chapter, feedback, history
     logger.log("Revising Chapter", 5)
     messages = history
     messages.append(interface.build_user_query(revision_prompt))
-    messages = interface.safe_generate_text(
+    messages = interface.generate_text(
         logger, messages, CHAPTER_REVISION_WRITER_MODEL,
         min_word_count=100
     )

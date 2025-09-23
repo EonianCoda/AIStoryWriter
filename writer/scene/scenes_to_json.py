@@ -1,5 +1,5 @@
 import writer.llm_editor
-import writer.print_utils
+import writer.logger
 import writer.config
 import writer.chapter.chapter_gen_summary_check
 import writer.prompts

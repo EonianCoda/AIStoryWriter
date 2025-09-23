@@ -15,7 +15,7 @@ def llm_count_chapters(interface: Interface, logger: Any, message_text: str) -> 
     logger.log("Prompting LLM To Get ChapterCount JSON", 5)
     messages = []
     messages.append(interface.build_user_query(prompt))
-    messages = interface.safe_generate_text(
+    messages = interface.generate_text(
         logger, messages, EVAL_MODEL, format="json"
     )
     logger.log("Finished Getting ChapterCount JSON", 5)
@@ -43,7 +43,7 @@ def llm_count_chapters(interface: Interface, logger: Any, message_text: str) -> 
             )
             messages.append(interface.build_user_query(edit_prompt))
             logger.log("Asking LLM TO Revise", 7)
-            messages = interface.safe_generate_text(
+            messages = interface.generate_text(
                 logger, messages, EVAL_MODEL, _Format="json"
             )
             logger.log("Done Asking LLM TO Revise JSON", 6)

@@ -31,11 +31,13 @@ import writer.config
 
 # Import required modules for story generation
 from writer.interface.wrapper import Interface
-from writer.print_utils import Logger
+from writer.logger import Logger
 from writer.chapter.chapter_detector import llm_count_chapters
 from writer.scrubber import scrub_novel
 from writer.statistics import get_word_count
-from writer.outline_generator import generate_outline, generate_per_chapter_outline
+from writer.outline_generator import generate_per_chapter_outline
+from writer.outline_generator import OutlineGenerator
+
 from writer.chapter.chapter_generator import generate_chapter
 from writer.story_info import get_story_info
 from writer.novel_editor import edit_novel
@@ -269,36 +271,32 @@ def load_prompt(prompt_path: str) -> str:
     with open(prompt_path, "r", encoding="utf-8") as f:
         return f.read()
 
-
 # ----------------------------------------------------------
 def main() -> None:
     """Main entry point for AI Story Writer."""
     # Parse command line arguments
     args = parse_args()
-    # Setup configuration
     setup_config(args)
     start_time = time.time()
-    # Get all model providers
     models = get_models()
     # Initialize logger and interface
     sys_logger = Logger()
     sys_logger.log("Created OLLAMA interface", 5)
     interface = Interface(models)
-    # Load prompt from file
-    prompt = load_prompt(args.prompt)
+    user_novel_prompt = load_prompt(args.prompt)
 
     # Translate prompt if requested
-    if hasattr(args, "translate_prompt_language") and args.translate_prompt_language:
-        prompt = translate_prompt(
-            interface, sys_logger, prompt, args.translate_prompt_language
-        )
+    # if hasattr(args, "translate_prompt_language") and args.translate_prompt_language:
+    #     user_novel_prompt = translate_prompt(
+    #         interface, sys_logger, user_novel_prompt, args.translate_prompt_language
+    #     )
 
-    # Generate the story outline
-    outline, elements, rough_chapter_outline, base_context = generate_outline(
-        interface, sys_logger, prompt, OUTLINE_QUALITY
-    )
-    base_prompt = prompt
+    # Step 1: Generate the story outline
+    outline_generator = OutlineGenerator(interface, sys_logger)
+    outline, story_elements, rough_outline, base_context = outline_generator.generate_outline(user_novel_prompt)
+    base_prompt = user_novel_prompt
 
+    # Step 2: Generate the chapters
     sys_logger.log("Detecting Chapters", 5)
     messages = [interface.build_user_query(outline)]
     num_chapters = llm_count_chapters(
@@ -319,7 +317,7 @@ def main() -> None:
             )
             chapter_outlines.append(chapter_outline)
     detailed_outline = "".join(chapter_outlines)
-    mega_outline = f"\n\n# Base Outline\n{elements}\n\n# Detailed Outline\n{detailed_outline}\n\n"
+    mega_outline = f"\n\n# Base Outline\n{story_elements}\n\n# Detailed Outline\n{detailed_outline}\n\n"
     used_outline = mega_outline if hasattr(args, "expand_outline") and args.expand_outline else outline
 
     # Start writing chapters
@@ -344,8 +342,8 @@ def main() -> None:
     # Prepare story info JSON
     story_info_json = {
         "Outline": outline,
-        "StoryElements": elements,
-        "RoughChapterOutline": rough_chapter_outline,
+        "StoryElements": story_elements,
+        "RoughChapterOutline": rough_outline,
         "BaseContext": base_context,
     }
     new_chapters = chapters

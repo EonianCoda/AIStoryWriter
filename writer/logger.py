@@ -53,7 +53,6 @@ class Logger:
         
         self.log(f"Wrote This Language Chain ({lang_chain_debug_title}) To Debug File {log_path_md}", 5)
 
-
     # Saves the given story to disk
     def save_story(self, story_content: str) -> None:
 
@@ -61,7 +60,6 @@ class Logger:
             f.write(story_content)
 
         self.log(f"Wrote Story To Disk At {self.log_dir_prefix}/Story.md", 5)
-
 
     # Logs an item
     def log(self, item, level: int) -> None:

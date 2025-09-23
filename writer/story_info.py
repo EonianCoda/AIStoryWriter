@@ -14,7 +14,7 @@ def get_story_info(interface: Interface, logger: Any, messages: List[Any]) -> Di
     logger.log("Prompting LLM To Generate Stats", 5)
     messages_list = messages
     messages_list.append(interface.build_user_query(prompt))
-    messages_list = interface.safe_generate_text(
+    messages_list = interface.generate_text(
         logger, messages_list, INFO_MODEL, format="json"
     )
     logger.log("Finished Getting Stats Feedback", 5)
@@ -40,7 +40,7 @@ def get_story_info(interface: Interface, logger: Any, messages: List[Any]) -> Di
             )
             messages_list.append(interface.build_user_query(edit_prompt))
             logger.log("Asking LLM TO Revise", 7)
-            messages_list = interface.safe_generate_text(
+            messages_list = interface.generate_text(
                 logger, messages_list, INFO_MODEL, format="json"
             )
             logger.log("Done Asking LLM TO Revise JSON", 6)

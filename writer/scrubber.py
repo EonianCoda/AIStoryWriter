@@ -2,7 +2,7 @@
 
 from typing import Any, List
 
-from writer.print_utils import Logger
+from writer.logger import Logger
 from writer.prompts import CHAPTER_SCRUB_PROMPT
 from writer.config import SCRUB_MODEL
 from writer.statistics import get_word_count
@@ -26,7 +26,7 @@ def scrub_novel(
         logger.log(f"Prompting LLM To Perform Chapter {i+1} Scrubbing Edit", 5)
         messages = []
         messages.append(interface.build_user_query(prompt))
-        messages = interface.safe_generate_text(
+        messages = interface.generate_text(
             logger, messages, SCRUB_MODEL
         )
         logger.log(f"Finished Chapter {i+1} Scrubbing Edit", 5)

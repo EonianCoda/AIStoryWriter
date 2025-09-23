@@ -21,7 +21,7 @@ def translate_prompt(
     logger.log("Prompting LLM To Translate User Prompt", 5)
     messages = []
     messages.append(interface.build_user_query(formatted_prompt))
-    messages = interface.safe_generate_text(
+    messages = interface.generate_text(
         logger, messages, TRANSLATOR_MODEL, min_word_count=50
     )
     logger.log("Finished Prompt Translation", 5)
@@ -48,7 +48,7 @@ def translate_novel(
         logger.log(f"Prompting LLM To Perform Chapter {chapter_index+1} Translation", 5)
         messages = []
         messages.append(interface.build_user_query(formatted_prompt))
-        messages = interface.safe_generate_text(
+        messages = interface.generate_text(
             logger, messages, TRANSLATOR_MODEL
         )
         logger.log(f"Finished Chapter {chapter_index+1} Translation", 5)
