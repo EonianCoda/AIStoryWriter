@@ -13,15 +13,16 @@ from writer.prompts import (
     STORY_ELEMENTS_PROMPT,
     INITIAL_OUTLINE_PROMPT,
     
-    CRITIC_OUTLINE_INTRO,
     CRITIC_OUTLINE_PROMPT,
     
-    OUTLINE_COMPLETE_INTRO,
     OUTLINE_COMPLETE_PROMPT,
     JSON_PARSE_ERROR,
     
     OUTLINE_REVISION_PROMPT,
     CHAPTER_OUTLINE_PROMPT,
+    
+    NOVELIST,
+    CRITIC,
 )
 # from writer.outline.story_elements import generate_story_elements
 from writer.logger import Logger
@@ -39,7 +40,8 @@ class OutlineGenerator:
         prompt_info = GET_IMPORTANT_BASE_PROMPT_INFO.format(user_story_prompt=user_story_prompt)
 
         self.logger.log("Extracting Important Base Context", 4)
-        messages = [self.interface.build_user_query(prompt_info)]
+        messages = [self.interface.build_system_query(NOVELIST),
+                    self.interface.build_user_query(prompt_info)]
         messages = self.interface.generate_text(
             self.logger, messages, INITIAL_OUTLINE_WRITER_MODEL
         )
@@ -87,7 +89,9 @@ class OutlineGenerator:
         self.logger.log("Generating Main Story Elements", 4)
 
         story_elements_prompt = STORY_ELEMENTS_PROMPT.format(user_story_prompt=user_story_prompt)
-        messages = [self.interface.build_user_query(story_elements_prompt)]
+        
+        messages = [self.interface.build_system_query(NOVELIST),
+                    self.interface.build_user_query(story_elements_prompt)]
         messages = self.interface.generate_text(
             self.logger, messages, INITIAL_OUTLINE_WRITER_MODEL, min_word_count=150
         )
@@ -103,7 +107,8 @@ class OutlineGenerator:
                                                             outline_prompt=user_story_prompt)
 
         self.logger.log("Generating Initial Outline", 4)
-        messages = [self.interface.build_user_query(outline_prompt)]
+        messages = [self.interface.build_system_query(NOVELIST),
+                    self.interface.build_user_query(outline_prompt)]
         messages = self.interface.generate_text(
             self.logger, messages, INITIAL_OUTLINE_WRITER_MODEL, min_word_count=250
         )
@@ -114,8 +119,7 @@ class OutlineGenerator:
 
     def get_feedback_on_outline(self, outline: str) -> str:
         """Prompt LLM to critique outline."""
-        history = []
-        history.append(self.interface.build_system_query(CRITIC_OUTLINE_INTRO))
+        history = [self.interface.build_system_query(CRITIC)]
         critic_outline_prompt = CRITIC_OUTLINE_PROMPT.format(outline=outline)
         
         self.logger.log("Prompting LLM To Critique Outline", 5)
@@ -131,7 +135,7 @@ class OutlineGenerator:
         """Prompt LLM to get review JSON for outline."""
         
         history = []
-        history.append(self.interface.build_system_query(OUTLINE_COMPLETE_INTRO)) # Character
+        history.append(self.interface.build_system_query(CRITIC)) # Character
         starting_prompt = OUTLINE_COMPLETE_PROMPT.format(outline=outline)
         self.logger.log("Prompting LLM To Get Review JSON", 5)
         history.append(self.interface.build_user_query(starting_prompt))

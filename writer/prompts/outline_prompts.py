@@ -65,13 +65,6 @@ Please make your response have the following format:
 - **Type**: (e.g., internal, external)
 - **Description**:
 
-## Symbolism
-### Symbol 1
-- **Symbol**:
-- **Meaning**:
-
-(Repeat the above structure for additional symbols)
-
 ## Characters
 ### Main Character(s)
 #### Main Character 1
@@ -253,7 +246,6 @@ Again, don't write the chapter itself, just create a detailed outline of the cha
 Make sure your chapter has a markdown-formatted name!
 """
 
-CRITIC_OUTLINE_INTRO = "You are a helpful AI Assistant. Answer the user's prompts to the best of your abilities."
 
 CRITIC_OUTLINE_PROMPT = """
 Please critique the following outline - make sure to provide constructive criticism on how it can be improved and point out any problems with it.
@@ -271,7 +263,6 @@ As you revise, consider the following criteria:
 Also, please check if the outline is written chapter-by-chapter, not in sections spanning multiple chapters or subsections.
 It should be very clear which chapter is which, and the content in each chapter."""
 
-OUTLINE_COMPLETE_INTRO = "You are a helpful AI Assistant. Answer the user's prompts to the best of your abilities."
 OUTLINE_COMPLETE_PROMPT = """
 <OUTLINE>
 {outline}

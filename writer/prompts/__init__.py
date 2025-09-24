@@ -5,9 +5,7 @@ from .outline_prompts import (
     INITIAL_OUTLINE_PROMPT,
     OUTLINE_REVISION_PROMPT,
     CHAPTER_OUTLINE_PROMPT,
-    CRITIC_OUTLINE_INTRO,
     CRITIC_OUTLINE_PROMPT,
-    OUTLINE_COMPLETE_INTRO,
     OUTLINE_COMPLETE_PROMPT,
     SUMMARY_OUTLINE_INTRO,
     SUMMARY_OUTLINE_PROMPT,
@@ -53,4 +51,13 @@ from .common_prompts import (
     CRITIC_CHAPTER_INTRO,
     CRITIC_CHAPTER_PROMPT,
     DEFAULT_SYSTEM_PROMPT,
+)
+
+from .character_system_prompts import (
+    NOVELIST,
+    CRITIC,
+    # editor,
+    # critic,
+    # translator,
+    # reviewer,
 )

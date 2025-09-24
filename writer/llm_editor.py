@@ -5,9 +5,7 @@ from typing import Any
 from writer.interface.wrapper import Interface
 from writer.logger import Logger
 from writer.prompts import (
-    CRITIC_OUTLINE_INTRO,
     CRITIC_OUTLINE_PROMPT,
-    OUTLINE_COMPLETE_INTRO,
     OUTLINE_COMPLETE_PROMPT,
     JSON_PARSE_ERROR,
     CRITIC_CHAPTER_INTRO,
