@@ -44,27 +44,27 @@ def generate_chapter(
     # We're going to remind the author model of the previous chapters here, so it knows what has been written before.
 
     #### Stage 0: Create base language chain
-    logger.log(f"Creating Base Langchain For Chapter {chapter_index} Generation", 2)
-    message_history: list = []
-    message_history.append(
-        interface.build_system_query(
-            CHAPTER_GENERATION_INTRO.format(
-                _ChapterNum=chapter_index, _TotalChapters=total_chapters
-            )
-        )
-    )
+    # logger.log(f"Creating Base Langchain For Chapter {chapter_index} Generation", 2)
+    # message_history: list = []
+    # message_history.append(
+    #     interface.build_system_query(
+    #         CHAPTER_GENERATION_INTRO.format(
+    #             _ChapterNum=chapter_index, _TotalChapters=total_chapters
+    #         )
+    #     )
+    # )
 
-    context_history_insert: str = ""
+    # context_history_insert: str = ""
 
-    if len(chapters) > 0:
+    # if len(chapters) > 0:
 
-        chapter_superlist: str = ""
-        for chapter in chapters:
-            chapter_superlist += f"{chapter}\n"
+    #     chapter_superlist: str = ""
+    #     for chapter in chapters:
+    #         chapter_superlist += f"{chapter}\n"
 
-        context_history_insert += CHAPTER_HISTORY_INSERT.format(
-            _Outline=outline, ChapterSuperlist=chapter_superlist
-        )
+    #     context_history_insert += CHAPTER_HISTORY_INSERT.format(
+    #         _Outline=outline, ChapterSuperlist=chapter_superlist
+    #     )
 
     #
     # message_history.append(Interface.BuildUserQuery(f"""

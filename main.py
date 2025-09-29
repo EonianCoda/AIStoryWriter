@@ -37,6 +37,7 @@ from writer.scrubber import scrub_novel
 from writer.statistics import get_word_count
 from writer.outline_generator import generate_per_chapter_outline
 from writer.outline_generator import OutlineGenerator
+from writer.chapter_generator import ChapterGenerator
 
 from writer.chapter.chapter_generator import generate_chapter
 from writer.story_info import get_story_info
@@ -293,7 +294,7 @@ def main() -> None:
 
     # Step 1: Generate the story outline
     outline_generator = OutlineGenerator(interface, sys_logger)
-    outline, story_elements, rough_outline, base_context = outline_generator.generate_outline(user_novel_prompt)
+    outline, story_elements, rough_outline, extra_prompt_info = outline_generator.generate_outline(user_novel_prompt)
     base_prompt = user_novel_prompt
 
     # Step 2: Generate the chapters
@@ -305,46 +306,49 @@ def main() -> None:
     sys_logger.log(f"Found {num_chapters} Chapter(s)", 5)
 
     # Expand outline chapter by chapter if requested
-    expand_prompt = (
-        f"Please help me expand upon the following outline, chapter by chapter.\n\n```\n{outline}\n```\n"
-    )
-    messages = [interface.build_user_query(expand_prompt)]
-    chapter_outlines = []
-    if hasattr(args, "expand_outline") and args.expand_outline:
-        for chapter in range(1, num_chapters + 1):
-            chapter_outline, messages = generate_per_chapter_outline(
-                interface, sys_logger, chapter, outline, messages
-            )
-            chapter_outlines.append(chapter_outline)
-    detailed_outline = "".join(chapter_outlines)
-    mega_outline = f"\n\n# Base Outline\n{story_elements}\n\n# Detailed Outline\n{detailed_outline}\n\n"
-    used_outline = mega_outline if hasattr(args, "expand_outline") and args.expand_outline else outline
+    # expand_prompt = (
+    #     f"Please help me expand upon the following outline, chapter by chapter.\n\n```\n{outline}\n```\n"
+    # )
+    # messages = [interface.build_user_query(expand_prompt)]
+    # chapter_outlines = []
+    # if hasattr(args, "expand_outline") and args.expand_outline:
+    #     for chapter in range(1, num_chapters + 1):
+    #         chapter_outline, messages = outline_generator.generate_per_chapter_outline(
+    #             interface, sys_logger, chapter, outline, messages
+    #         )
+    #         chapter_outlines.append(chapter_outline)
+    # detailed_outline = "".join(chapter_outlines)
+    # mega_outline = f"\n\n# Base Outline\n{story_elements}\n\n# Detailed Outline\n{detailed_outline}\n\n"
+    # used_outline = mega_outline if hasattr(args, "expand_outline") and args.expand_outline else outline
 
     # Start writing chapters
     sys_logger.log("Starting Chapter Writing", 5)
-    chapters = []
-    for i in range(1, num_chapters + 1):
-        chapter = generate_chapter(
-            interface,
-            sys_logger,
-            i,
-            num_chapters,
-            outline,
-            chapters,
-            OUTLINE_QUALITY,
-            base_context,
-        )
-        chapter = f"### Chapter {i}\n\n{chapter}"
-        chapters.append(chapter)
-        chapter_word_count = get_word_count(chapter)
-        sys_logger.log(f"Chapter Word Count: {chapter_word_count}", 2)
+    chapter_generator = ChapterGenerator(interface, sys_logger)
+    chapters = chapter_generator.generate_all_chapters(outline, num_chapters, extra_prompt_info)
+    
+    # chapters = []
+    # for i in range(1, num_chapters + 1):
+    #     chapter = generate_chapter(
+    #         interface,
+    #         sys_logger,
+    #         i,
+    #         num_chapters,
+    #         outline,
+    #         chapters,
+    #         OUTLINE_QUALITY,
+    #         base_context,
+    #     )
+    #     chapter = f"### Chapter {i}\n\n{chapter}"
+    #     chapters.append(chapter)
+    #     chapter_word_count = get_word_count(chapter)
+    #     sys_logger.log(f"Chapter Word Count: {chapter_word_count}", 2)
 
     # Prepare story info JSON
     story_info_json = {
         "Outline": outline,
         "StoryElements": story_elements,
         "RoughChapterOutline": rough_outline,
-        "BaseContext": base_context,
+        "BaseContext": extra_prompt_info,
     }
     new_chapters = chapters
 

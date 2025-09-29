@@ -1,58 +1,34 @@
 """Outline generation utilities."""
 import json
 from typing import Any, Tuple, List
-from writer.interface.wrapper import Interface
 from writer.config import (
     INITIAL_OUTLINE_WRITER_MODEL,
     OUTLINE_MAX_REVISIONS,
     OUTLINE_MIN_REVISIONS,
     CHAPTER_OUTLINE_WRITER_MODEL,
 )
-from writer.prompts import (
-    GET_IMPORTANT_BASE_PROMPT_INFO,
-    STORY_ELEMENTS_PROMPT,
-    INITIAL_OUTLINE_PROMPT,
-    
-    CRITIC_OUTLINE_PROMPT,
-    
-    OUTLINE_COMPLETE_PROMPT,
-    JSON_PARSE_ERROR,
-    
-    OUTLINE_REVISION_PROMPT,
-    CHAPTER_OUTLINE_PROMPT,
-    
-    NOVELIST,
-    CRITIC,
-)
-# from writer.outline.story_elements import generate_story_elements
-from writer.logger import Logger
 from writer.config import REVISION_MODEL, EVAL_MODEL
+from writer.generator import Generator
 
-class OutlineGenerator:
-    def __init__(self, interface: Interface, logger: Logger):
-        self.interface = interface
-        self.logger = logger
-
+class OutlineGenerator(Generator):
     def generate_outline(self, user_story_prompt: str) -> Tuple[str, Any, Any, Any]:
         """Generate the story outline."""
 
         # 1. Extract Important Base Context
-        prompt_info = GET_IMPORTANT_BASE_PROMPT_INFO.format(user_story_prompt=user_story_prompt)
-
         self.logger.log("Extracting Important Base Context", 4)
-        messages = [self.interface.build_system_query(NOVELIST),
-                    self.interface.build_user_query(prompt_info)]
+        messages = [self.interface.build_system_query(self.novelist),
+                    self.interface.build_user_query(self.get_outline_prompt("extra_prompt_info_generation").format(user_story_prompt=user_story_prompt))]
         messages = self.interface.generate_text(
             self.logger, messages, INITIAL_OUTLINE_WRITER_MODEL
         )
-        base_context = self.interface.get_last_message_text(messages)
+        extra_prompt_info = self.interface.get_last_message_text(messages)
         self.logger.log("Done Extracting Important Base Context", 4)
 
         # 2. Generate Story Elements
         story_elements = self.generate_story_elements(user_story_prompt)
         
         # 3. Generate Initial Outline
-        outline, writing_history = self.generate_initial_outline(user_story_prompt, story_elements)
+        rough_outline, writing_history = self.generate_initial_outline(user_story_prompt, story_elements)
         
         self.logger.log("Entering Feedback/Revision Loop", 3)
         rating: int| bool = 0
@@ -61,9 +37,9 @@ class OutlineGenerator:
         while True:
             iterations += 1
             # 4. Get Feedback on Outline
-            feedback = self.get_feedback_on_outline(outline)
+            feedback = self.get_feedback_on_outline(rough_outline)
             # 4.5 Get Rating on Outline
-            rating = self.get_outline_rating(outline)
+            rating = self.get_outline_rating(rough_outline)
             # Currently get_outline_rating returns a bool - does it meet the standards (yes/no)?
             #TODO Future - could return a 0-100 int rating again if needed
                 # Rating has been changed from a 0-100 int, to does it meet the standards (yes/no)?
@@ -74,23 +50,22 @@ class OutlineGenerator:
                 break
             
             # 5. Revise Outline (if rating not good enough)
-            outline, writing_history = self.revise_outline(outline, feedback, writing_history)
+            rough_outline, writing_history = self.revise_outline(rough_outline, feedback, writing_history)
 
         self.logger.log("Quality Standard Met, Exiting Feedback/Revision Loop", 4)
 
-        final_outline: str = f"""{base_context}
+        outline: str = f"""{extra_prompt_info}
         {story_elements}
-        {outline}
-"""  
-        return final_outline, story_elements, outline, base_context
+        {rough_outline}"""  
+        return outline, story_elements, rough_outline, extra_prompt_info
 
     def generate_story_elements(self, user_story_prompt: str):
         # Generate Initial Story Elements
         self.logger.log("Generating Main Story Elements", 4)
 
-        story_elements_prompt = STORY_ELEMENTS_PROMPT.format(user_story_prompt=user_story_prompt)
-        
-        messages = [self.interface.build_system_query(NOVELIST),
+        story_elements_prompt = self.get_outline_prompt("story_elements").format(user_story_prompt=user_story_prompt)
+
+        messages = [self.interface.build_system_query(self.novelist),
                     self.interface.build_user_query(story_elements_prompt)]
         messages = self.interface.generate_text(
             self.logger, messages, INITIAL_OUTLINE_WRITER_MODEL, min_word_count=150
@@ -103,11 +78,11 @@ class OutlineGenerator:
     def generate_initial_outline(self, 
                          user_story_prompt: str,
                          story_elements: str):
-        outline_prompt: str = INITIAL_OUTLINE_PROMPT.format(story_elements=story_elements, 
-                                                            outline_prompt=user_story_prompt)
+        outline_prompt = self.get_outline_prompt("initial_outline").format(story_elements=story_elements, 
+                                                                    outline_prompt=user_story_prompt)
 
         self.logger.log("Generating Initial Outline", 4)
-        messages = [self.interface.build_system_query(NOVELIST),
+        messages = [self.interface.build_system_query(self.novelist),
                     self.interface.build_user_query(outline_prompt)]
         messages = self.interface.generate_text(
             self.logger, messages, INITIAL_OUTLINE_WRITER_MODEL, min_word_count=250
@@ -119,9 +94,9 @@ class OutlineGenerator:
 
     def get_feedback_on_outline(self, outline: str) -> str:
         """Prompt LLM to critique outline."""
-        history = [self.interface.build_system_query(CRITIC)]
-        critic_outline_prompt = CRITIC_OUTLINE_PROMPT.format(outline=outline)
-        
+        history = [self.interface.build_system_query(self.critic)] # Character
+        critic_outline_prompt = self.get_outline_prompt("critic_outline").format(outline=outline)
+
         self.logger.log("Prompting LLM To Critique Outline", 5)
         history.append(self.interface.build_user_query(critic_outline_prompt))
         history = self.interface.generate_text(
@@ -135,8 +110,8 @@ class OutlineGenerator:
         """Prompt LLM to get review JSON for outline."""
         
         history = []
-        history.append(self.interface.build_system_query(CRITIC)) # Character
-        starting_prompt = OUTLINE_COMPLETE_PROMPT.format(outline=outline)
+        history.append(self.interface.build_system_query(self.get_character_prompt("critic"))) # Character
+        starting_prompt = self.get_outline_prompt("outline_complete").format(outline=outline)
         self.logger.log("Prompting LLM To Get Review JSON", 5)
         history.append(self.interface.build_user_query(starting_prompt))
         history = self.interface.generate_text(
@@ -160,7 +135,7 @@ class OutlineGenerator:
                     self.logger.log("Critical Error Parsing JSON", 7)
                     return False
                 self.logger.log("Error Parsing JSON Written By LLM, Asking For Edits", 7)
-                edit_prompt = JSON_PARSE_ERROR.format(_Error=e)
+                edit_prompt = self.get_outline_prompt("json_parse_error").format(_Error=e)
                 history.append(self.interface.build_user_query(edit_prompt))
                 self.logger.log("Asking LLM TO Revise", 7)
                 history = self.interface.generate_text(
@@ -169,7 +144,7 @@ class OutlineGenerator:
                 self.logger.log("Done Asking LLM TO Revise JSON", 6)
 
     def revise_outline(self, outline: str, feedback: str, history: list = []):
-        revision_prompt = OUTLINE_REVISION_PROMPT.format(outline=outline, 
+        revision_prompt = self.get_outline_prompt("outline_revision").format(outline=outline, 
                                                         feedback=feedback)
 
         self.logger.log("Revising Outline", 2)
@@ -183,26 +158,23 @@ class OutlineGenerator:
 
         return summary_text, messages
 
-def generate_per_chapter_outline(
-    interface: Interface,
-    logger: Any,
-    chapter: int,
-    outline: str,
-    messages: List[Any]
-) -> Tuple[str, List[Any]]:
-    """Generate per-chapter outline."""
+    def generate_per_chapter_outline(
+        self,
+        chapter: int,
+        outline: str,
+        messages: List[Any]
+    ) -> Tuple[str, List[Any]]:
+        """Generate per-chapter outline."""
 
-    revision_prompt: str = CHAPTER_OUTLINE_PROMPT.format(
-        _Chapter=chapter,
-        _Outline=outline
-    )
-    logger.log("Generating Outline For Chapter " + str(chapter), 5)
-    messages_list = messages
-    messages_list.append(interface.build_user_query(revision_prompt))
-    messages_list = interface.generate_text(
-        logger, messages_list, CHAPTER_OUTLINE_WRITER_MODEL, min_word_count=50
-    )
-    summary_text: str = interface.get_last_message_text(messages_list)
-    logger.log("Done Generating Outline For Chapter " + str(chapter), 5)
+        chapter_outline_prompt = self.get_outline_prompt("chapter_outline").format(chapter=chapter, 
+                                                                                   outline=outline)
+        self.logger.log("Generating Outline For Chapter " + str(chapter), 5)
+        messages_list = messages
+        messages_list.append(self.interface.build_user_query(chapter_outline_prompt))
+        messages_list = self.interface.generate_text(
+            self.logger, messages_list, CHAPTER_OUTLINE_WRITER_MODEL, min_word_count=50
+        )
+        summary_text = self.interface.get_last_message_text(messages_list)
+        self.logger.log("Done Generating Outline For Chapter " + str(chapter), 5)
 
-    return summary_text, messages_list
+        return summary_text, messages_list

@@ -1,0 +1,1 @@
+JSON_PARSE_ERROR = '''Please revise your JSON. It encountered the following error during parsing: {_Error}. Remember that your entire response is plugged directly into a JSON parser, so don't write **anything** except pure json.'''

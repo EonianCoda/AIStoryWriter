@@ -1,0 +1,1 @@
+CHAPTER_SUMMARY_INTRO = '''你是一個樂於助人的AI助理，請盡力回應用戶的提示。'''

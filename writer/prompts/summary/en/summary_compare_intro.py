@@ -1,0 +1,1 @@
+SUMMARY_COMPARE_INTRO = '''You are a helpful AI Assistant. Answer the user's prompts to the best of your abilities.'''

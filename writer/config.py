@@ -1,23 +1,23 @@
 INITIAL_OUTLINE_WRITER_MODEL = (
-    "ollama://qwen3:4b"  # Note this value is overridden by the argparser
+    "ollama://qwen3:8b"  # Note this value is overridden by the argparser
 )
 CHAPTER_OUTLINE_WRITER_MODEL = (
-    "ollama://qwen3:4b"  # Note this value is overridden by the argparser
+    "ollama://qwen3:8b"  # Note this value is overridden by the argparser
 )
-CHAPTER_STAGE1_WRITER_MODEL = "ollama://qwen3:4b"  # Note this value is overridden by the argparser
-CHAPTER_STAGE2_WRITER_MODEL = "ollama://qwen3:4b"  # Note this value is overridden by the argparser
-CHAPTER_STAGE3_WRITER_MODEL = "ollama://qwen3:4b"  # Note this value is overridden by the argparser
-CHAPTER_STAGE4_WRITER_MODEL = "ollama://qwen3:4b"  # Note this value is overridden by the argparser
+CHAPTER_STAGE1_WRITER_MODEL = "ollama://qwen3:8b"  # Note this value is overridden by the argparser
+CHAPTER_STAGE2_WRITER_MODEL = "ollama://qwen3:8b"  # Note this value is overridden by the argparser
+CHAPTER_STAGE3_WRITER_MODEL = "ollama://qwen3:8b"  # Note this value is overridden by the argparser
+CHAPTER_STAGE4_WRITER_MODEL = "ollama://qwen3:8b"  # Note this value is overridden by the argparser
 CHAPTER_REVISION_WRITER_MODEL = (
-    "ollama://qwen3:4b"  # Note this value is overridden by the argparser
+    "ollama://qwen3:8b"  # Note this value is overridden by the argparser
 )
-REVISION_MODEL = "ollama://qwen3:4b"  # Note this value is overridden by the argparser
-EVAL_MODEL = "ollama://qwen3:4b"  # Note this value is overridden by the argparser
-INFO_MODEL = "ollama://qwen3:4b"  # Note this value is overridden by the argparser
-SCRUB_MODEL = "ollama://qwen3:4b"  # Note this value is overridden by the argparser
-CHECKER_MODEL = "ollama://qwen3:4b"  # Model used to check results
-TRANSLATOR_MODEL = "ollama://qwen3:4b"
-CHAPTER_WRITER_MODEL = "ollama://qwen3:4b"
+REVISION_MODEL = "ollama://qwen3:8b"  # Note this value is overridden by the argparser
+EVAL_MODEL = "ollama://qwen3:8b"  # Note this value is overridden by the argparser
+INFO_MODEL = "ollama://qwen3:8b"  # Note this value is overridden by the argparser
+SCRUB_MODEL = "ollama://qwen3:8b"  # Note this value is overridden by the argparser
+CHECKER_MODEL = "ollama://qwen3:8b"  # Model used to check results
+TRANSLATOR_MODEL = "ollama://qwen3:8b"
+CHAPTER_WRITER_MODEL = "ollama://qwen3:8b"
 
 
 OLLAMA_CTX = 8192
@@ -48,7 +48,7 @@ OPTIONAL_OUTPUT_NAME = ""
 DEBUG = False
 
 # Tested models:
-"qwen3:4b"  # works as editor model, DO NOT use as writer model, it sucks
+"qwen3:8b"  # works as editor model, DO NOT use as writer model, it sucks
 "vanilj/midnight-miqu-70b-v1.5"  # works rather well as the writer, not well as anything else
 "command-r"
 "qwen:72b"

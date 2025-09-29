@@ -1,3 +1,15 @@
+import importlib
+
+def load_prompt(feature, lang, name):
+    """
+    feature: 大功能資料夾，如 'summarization'
+    lang: 語言，如 'zh_Hant'
+    name: 檔名（不含 .py），如 'news'
+    """
+    module_path = f"{__name__}.{feature}.{lang}.{name.lower()}"
+    mod = importlib.import_module(module_path)
+    return getattr(mod, name.upper())
+
 from .outline_prompts import (
     GET_IMPORTANT_BASE_PROMPT_INFO,
     STORY_ELEMENTS_PROMPT,
@@ -55,9 +67,14 @@ from .common_prompts import (
 
 from .character_system_prompts import (
     NOVELIST,
+    NOVELISTV2,
     CRITIC,
     # editor,
     # critic,
     # translator,
     # reviewer,
+)
+
+from .translator import (
+    CHINESE_TRANSLATOR
 )

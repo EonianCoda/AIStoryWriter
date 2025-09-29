@@ -1,0 +1,1 @@
+SUMMARY_COMPARE_INTRO = '''你是一個有幫助的AI助手。請盡力回答用戶的提示。'''

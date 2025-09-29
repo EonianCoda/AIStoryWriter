@@ -1,0 +1,1 @@
+SUMMARY_OUTLINE_INTRO = '''你是一個樂於助人的AI助手。盡你所能回應用戶的提示。'''
