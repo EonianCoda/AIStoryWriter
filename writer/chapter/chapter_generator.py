@@ -82,7 +82,7 @@ def generate_chapter(
     )
     chapter_segment_messages.append(
         interface.build_user_query(
-            CHAPTER_GENERATION_PROMPT.format(
+            CHAPTER_GENERATION_PPROMPT.format(
                 _Outline=outline, _ChapterNum=chapter_index
             )
         )

@@ -1,14 +1,14 @@
 CHAPTER_SUMMARY = '''
-I'm writing the next chapter in my novel (chapter {_ChapterNum}), and I have the following written so far.
+I'm writing the next chapter in my novel (chapter {chapter_idx}), and I have the following written so far.
 
 My outline:
 <OUTLINE>
-{_Outline}
+{outline}
 </OUTLINE>
 
 And what I've written in the last chapter:
 <PREVIOUS_CHAPTER>
-{_LastChapter}
+{prev_chapter}
 </PREVIOUS_CHAPTER>
 
 Please create a list of important summary points from the last chapter so that I know what to keep in mind as I write this chapter.

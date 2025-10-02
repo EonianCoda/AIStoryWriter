@@ -1,13 +1,13 @@
-CHAPTER_SUMMARY = '''我正在為我的小說寫下下一章（第 {_ChapterNum} 章），目前已撰寫以下內容。
+CHAPTER_SUMMARY = '''我正在為我的小說寫下下一章（第 {chapter_idx} 章），目前已撰寫以下內容。
 
 我的大綱：
 <OUTLINE>
-{_Outline}
+{outline}
 </OUTLINE>
 
 上一章寫作內容：
 <PREVIOUS_CHAPTER>
-{_LastChapter}
+{prev_chapter}
 </PREVIOUS_CHAPTER>
 
 請為我整理上一章的關鍵摘要點，以便我寫作本章時能清楚掌握重點。同時請加入上一章的總結，並着重記錄故事結尾的重要情節轉折點與故事當前狀態。這樣我寫作時就能明確接續點。
